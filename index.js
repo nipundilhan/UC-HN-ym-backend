@@ -12,7 +12,7 @@ const testController = require('./controllers/test-controller');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
+//allow to access from anywhere
 app.use(cors());
 app.use(bodyParser.json());
 
