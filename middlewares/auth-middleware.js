@@ -10,6 +10,7 @@ function verifyToken(req, res, next) {
     }
 
     try {
+        // we might not be able to get any other newly assign variables in decoded user object eg:- email
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();

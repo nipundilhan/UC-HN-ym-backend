@@ -18,6 +18,7 @@ function protected(req, res) {
 
 // Controller method to fetch username from JWT
 function getUsername(req, res) {
+    // we might not be able to get any other newly assign variables in decoded user object eg:- email
     res.json({ username: req.user.username });
 }
 
