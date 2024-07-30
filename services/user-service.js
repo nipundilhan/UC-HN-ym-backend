@@ -8,7 +8,7 @@ function defineUserStructure(id, userData, userRole) {
         username: userData.username,
         role: userRole,
         gender: userData.gender,
-        birthday: userData.birthday,
+        dob: userData.dob,
         email: userData.email,
         password: userData.password,
     };
