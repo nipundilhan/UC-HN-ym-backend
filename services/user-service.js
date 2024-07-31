@@ -11,6 +11,7 @@ function defineUserStructure(id, userData, userRole) {
         dob: userData.dob,
         email: userData.email,
         password: userData.password,
+        avatarCode :userData.avatarCode,
     };
 }
 
