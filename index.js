@@ -7,6 +7,7 @@ const errorHandler = require('./middlewares/error-handler');
 const authController = require('./controllers/auth-controller');
 const userController = require('./controllers/user-controller');
 const testController = require('./controllers/test-controller');
+const tutorialGameController = require('./controllers/module1-game1-tutorial-game-controller');
 
 // Initialize Express app
 const app = express();
@@ -21,6 +22,7 @@ const rootPath = '/YM';
 app.use(rootPath+'/auth', authController);
 app.use(rootPath+'/user', userController);
 app.use(rootPath+'/test', testController);
+app.use(rootPath+'/tutorial', tutorialGameController);
 
 // hand over the errors to error handler
 app.use(errorHandler);
