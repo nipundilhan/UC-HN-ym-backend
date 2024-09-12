@@ -44,6 +44,10 @@ async function findStudentTasksByStudentID(studentId) {
 }
 
 
+
+
+
+
 async function handleAddTutorial(tutorialData) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -73,10 +77,10 @@ async function handleAddTutorial(tutorialData) {
 
             // Update the existing task
             const result = await collection.updateOne(
-                { _id: objectId, "module1.game1.tasks._id": taskId },
+                { _id: new ObjectId(tutorialData._id), "module1.game1.tasks._id": taskId }, // Fixed objectId reference
                 {
                     $set: {
-                        "module1.game1.tasks.$.name": taskData.name,
+                        //"module1.game1.tasks.$.name": taskData.name,
                         "module1.game1.tasks.$.description": taskData.description,
                         "module1.game1.tasks.$.date": taskData.date,
                         "module1.game1.tasks.$.completePercentage": taskData.completePercentage,
@@ -121,4 +125,44 @@ async function handleAddTutorial(tutorialData) {
 
 }
 
-module.exports = { handleAddTutorial , findStudentTasksByStudentID };
+
+
+async function deleteTask(studentTaskId, taskId) {
+    const db = await connectDB();
+    const collection = db.collection('studentTasks');
+
+    // Convert studentTaskId and taskId to ObjectId
+    const studentTaskObjectId = new ObjectId(studentTaskId);
+    const taskObjectId = new ObjectId(taskId);
+
+    // Find the student task document
+    const studentTask = await collection.findOne({ _id: studentTaskObjectId });
+
+    if (!studentTask) {
+        throw new Error('Student task not found');
+    }
+
+    // Find the task to delete
+    const taskToDelete = studentTask.module1.game1.tasks.find(task => task._id.equals(taskObjectId));
+
+    if (!taskToDelete) {
+        throw new Error('Task not found');
+    }
+
+    // Check if the task is already completed
+    if (taskToDelete.completePercentage === 100) {
+        throw new Error('Cannot delete a completed task');
+    }
+
+    // Delete the task and update the points accordingly
+    const result = await collection.updateOne(
+        { _id: studentTaskObjectId },
+        {
+            $pull: { "module1.game1.tasks": { _id: taskObjectId } }
+        }
+    );
+
+    return result;
+}
+
+module.exports = { handleAddTutorial , findStudentTasksByStudentID , deleteTask };
