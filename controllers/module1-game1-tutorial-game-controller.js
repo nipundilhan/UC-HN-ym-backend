@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post('/', addTutorial);
 router.get('/findByStudent/:id', findTasksByStudentID);
+router.delete('/:studentTaskId/:taskId', deleteTutorialTask);
 
 // Controller method to handle protected route
 async function addTutorial(req, res) {
@@ -33,6 +34,24 @@ async function findTasksByStudentID(req, res) {
         }
     } catch (error) {
         console.error('Error updating country:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function deleteTutorialTask(req, res) {
+    try {
+        const { studentTaskId, taskId } = req.params;
+
+        // Call service layer to handle task deletion
+        const result = await studentTutorialService.deleteTask(studentTaskId, taskId);
+
+        if (result.modifiedCount > 0) {
+            res.status(200).json({ message: 'Task deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'Task not found or already deleted' });
+        }
+    } catch (error) {
+        console.error('Error deleting task:', error);
         res.status(400).json({ message: error.message });
     }
 }
