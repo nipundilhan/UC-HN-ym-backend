@@ -68,10 +68,11 @@ async function handleAddTutorial(tutorialData) {
             if (!existingTask) {
                 throw new Error('Task not found');
             }
-
+/*
             if(existingTask.completePercentage === 100){
                 throw new Error('cant edit completed tasks');
             }
+*/
 
             const pointsDifference = taskPoints - (existingTask.completePercentage === 100 ? 1 : 0);
 
