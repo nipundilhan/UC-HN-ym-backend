@@ -9,6 +9,7 @@ const userController = require('./controllers/user-controller');
 const testController = require('./controllers/test-controller');
 const modulesController = require('./controllers/modules-controller');
 const tutorialGameController = require('./controllers/module1-game1-tutorial-game-controller');
+const studentMoodsController = require('./controllers/student-mood-controller');
 
 // Initialize Express app
 const app = express();
@@ -25,6 +26,7 @@ app.use(rootPath+'/user', userController);
 app.use(rootPath+'/test', testController);
 app.use(rootPath+'/modules', modulesController);
 app.use(rootPath+'/tutorial', tutorialGameController);
+app.use(rootPath+'/moods', studentMoodsController);
 
 // hand over the errors to error handler
 app.use(errorHandler);

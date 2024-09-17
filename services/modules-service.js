@@ -2,6 +2,23 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 
+// Define the structure of the studentTask when a new one is created
+function defineStudentTaskStructure(studentData) {
+    return {
+        studentName: studentData.studentName || "",
+        studentId: new ObjectId(studentData.studentId),
+        moods: [],
+        module1: {
+            moduleCode: "MOD1",
+            game1: {
+                gameCode: "GM1",
+                gamePoints: 0,
+                tasks: []
+            }
+        }
+    };
+}
+
 async function getGameDetails(moduleCode, gameCode) {
 
     const db = await connectDB();
@@ -40,10 +57,16 @@ async function findStudentGameMarks(studentId) {
     
     // Find the first document with the matching studentId
     const result = await collection.findOne(query);
+
+
+    // Generate complete moods array (recorded + missing days)
+    const completeMoods = generateCompleteMoods(result.moods);
+
     const response = {
         game1Marks: result.module1.game1.gamePoints,
         game1Margin: game1Details.achievementMargin,
-        totalMarks: result.module1.game1.gamePoints + result.module1.game1.gamePoints
+        totalMarks: result.module1.game1.gamePoints + result.module1.game1.gamePoints,
+        moods: completeMoods,
     };
 
     // Check if game2 exists before adding it to the response
@@ -56,4 +79,40 @@ async function findStudentGameMarks(studentId) {
 
 
 
-module.exports = { getGameDetails , findStudentGameMarks };
+function generateCompleteMoods(moods) {
+    // Helper function to format date to 'yyyy-mm-dd'
+    const formatDate = (date) => date.toISOString().split('T')[0];
+
+    // Helper function to get last 30 days as an array of dates
+    const getLast30Days = () => {
+        const dates = [];
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            dates.push(formatDate(d));
+        }
+        return dates;
+    };
+
+    // Extract recorded moods
+    const recordedMoods = moods.map(mood => ({
+        date: formatDate(new Date(mood.date)),
+        mood: mood.mood
+    }));
+
+    // Get all dates for the last 30 days
+    const last30Days = getLast30Days();
+
+    // Create a complete moods array, filling in missing days with the dummy mood
+    const completeMoods = last30Days.map(date => {
+        const recordedMood = recordedMoods.find(m => m.date === date);
+        return recordedMood ? recordedMood : { date, mood: 'N/R' };
+    });
+
+    return completeMoods;
+}
+
+
+
+module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure};
