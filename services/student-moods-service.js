@@ -11,33 +11,29 @@ async function addOrUpdateMood(studentData) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
 
-    const { _id, studentId, date, mood } = studentData;
+    const { studentId, date, mood } = studentData;
 
-    // Check if _id is provided to update an existing studentTask
-    if (_id) {
-        const studentTask = await collection.findOne({ _id: new ObjectId(_id) });
+    // Check if there is an existing studentTask for the given studentId
+    let studentTask = await collection.findOne({ studentId: new ObjectId(studentId) });
 
-        if (studentTask) {
-            // Check if the date already exists in moods array
-            const existingMoodIndex = studentTask.moods.findIndex(moodItem => moodItem.date === date);
+    if (studentTask) {
+        // If the studentTask exists, check if the date already exists in the moods array
+        const existingMoodIndex = studentTask.moods.findIndex(moodItem => moodItem.date === date);
 
-            if (existingMoodIndex > -1) {
-                // If date exists, update the mood
-                await collection.updateOne(
-                    { _id: new ObjectId(_id), 'moods.date': date },
-                    { $set: { 'moods.$.mood': mood } }
-                );
-            } else {
-                // If date does not exist, push new mood into moods array
-                await collection.updateOne(
-                    { _id: new ObjectId(_id) },
-                    { $push: { moods: { date, mood } } }
-                );
-            }
+        if (existingMoodIndex > -1) {
+            // If the date exists, update the mood
+            await collection.updateOne(
+                { studentId: new ObjectId(studentId), 'moods.date': date },
+                { $set: { 'moods.$.mood': mood } }
+            );
         } else {
-            throw new Error("Student Task not found");
+            // If the date does not exist, push the new mood into the moods array
+            await collection.updateOne(
+                { studentId: new ObjectId(studentId) },
+                { $push: { moods: { date, mood } } }
+            );
         }
-    } else {
+    }  else {
         // If no _id is provided, create a new studentTask document
         const newStudentTask = defineStudentTaskStructure(studentData);
         newStudentTask.moods.push({ date, mood }); // Add the mood

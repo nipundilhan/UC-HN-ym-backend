@@ -58,11 +58,14 @@ async function findStudentGameMarks(studentId) {
     // Find the first document with the matching studentId
     const result = await collection.findOne(query);
 
-
+    if (!result) {
+        throw new Error('Student not found');
+    }
     // Generate complete moods array (recorded + missing days)
     const completeMoods = generateCompleteMoods(result.moods);
 
     const response = {
+        taskId : result._id,
         game1Marks: result.module1.game1.gamePoints,
         game1Margin: game1Details.achievementMargin,
         totalMarks: result.module1.game1.gamePoints + result.module1.game1.gamePoints,
