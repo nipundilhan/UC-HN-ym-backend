@@ -66,6 +66,7 @@ async function findStudentGameMarks(studentId) {
 
     const response = {
         taskId : result._id,
+        game1CompletedTasks: result.module1.game1.tasks.length,
         game1Marks: result.module1.game1.gamePoints,
         game1Margin: game1Details.achievementMargin,
         totalMarks: result.module1.game1.gamePoints + result.module1.game1.gamePoints,

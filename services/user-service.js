@@ -51,4 +51,19 @@ async function handleUserSignup(userDetails) {
     return newUser;
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup };
+async function getUserById(id) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const user = await collection.findOne({ _id: new ObjectId(id) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user: ${error.message}`);
+    }
+}
+
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup ,getUserById };
