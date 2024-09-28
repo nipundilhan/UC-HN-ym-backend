@@ -1,5 +1,6 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
+const { calculateTotalMarks } = require('../services/modules-service');
 
 
 function defineStructureStudentTasks(id, studentMarksData ) {
@@ -39,6 +40,8 @@ async function findStudentTasksByStudentID(studentId) {
     
     // Find the first document with the matching studentId
     const result = await collection.findOne(query);
+
+    result.totalMarks = calculateTotalMarks(result);
 
     return result;
 }

@@ -1,6 +1,7 @@
 // services/moduleService.js
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
+const { getUserById } = require('../services/user-service');
 
 // Define the structure of the studentTask when a new one is created
 function defineStudentTaskStructure(studentData) {
@@ -61,15 +62,24 @@ async function findStudentGameMarks(studentId) {
     if (!result) {
         throw new Error('Student not found');
     }
+
+
+    
+    const stdnt = await getUserById(studentId);
+        
+
+
+
     // Generate complete moods array (recorded + missing days)
     const completeMoods = generateCompleteMoods(result.moods);
 
     const response = {
         taskId : result._id,
+        avatarCode : stdnt.avatarCode,
         game1CompletedTasks: result.module1.game1.tasks.length,
         game1Marks: result.module1.game1.gamePoints,
         game1Margin: game1Details.achievementMargin,
-        totalMarks: result.module1.game1.gamePoints + result.module1.game1.gamePoints,
+        totalMarks: calculateTotalMarks(result) ,
         moods: completeMoods,
     };
 
@@ -79,6 +89,11 @@ async function findStudentGameMarks(studentId) {
     }
 
     return response;
+}
+
+function calculateTotalMarks(result) {
+    // Assuming total marks is the sum of gamePoints and other logic if needed
+    return result.module1.game1.gamePoints + result.module1.game1.gamePoints; // Replace with the actual logic if different
 }
 
 
@@ -111,7 +126,7 @@ function generateCompleteMoods(moods) {
     // Create a complete moods array, filling in missing days with the dummy mood
     const completeMoods = last30Days.map(date => {
         const recordedMood = recordedMoods.find(m => m.date === date);
-        return recordedMood ? recordedMood : { date, mood: 'N/R' };
+        return recordedMood ? recordedMood : { date, mood: 'missed' };
     });
 
     return completeMoods;
@@ -119,4 +134,4 @@ function generateCompleteMoods(moods) {
 
 
 
-module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure};
+module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure , calculateTotalMarks};
