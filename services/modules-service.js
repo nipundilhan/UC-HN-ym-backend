@@ -5,7 +5,9 @@ const { getUserById } = require('../services/user-service');
 
 // Define the structure of the studentTask when a new one is created
 function defineStudentTaskStructure(studentData) {
+    
     return {
+        _id :  new ObjectId(),
         studentName: studentData.studentName || "",
         studentId: new ObjectId(studentData.studentId),
         moods: [],
@@ -14,7 +16,19 @@ function defineStudentTaskStructure(studentData) {
             game1: {
                 gameCode: "GM1",
                 gamePoints: 0,
-                tasks: []
+                tasks: [] // Tasks array will contain objects with the following structure:
+                /*
+                    Task Object Structure:
+                    {
+                        _id: new ObjectId(),        // ObjectId, unique identifier for the task
+                        name: (String),             // Name of the task
+                        description: (String),      // Description of the task
+                        date: (Date),               // Date of task creation or completion
+                        status: (String),           // Task status, e.g., 'completed', 'pending'
+                        completePercentage: (Number),// Completion percentage (if relevant)
+                        points: (Number)            // Points assigned based on task status
+                    }
+                */
             }
         }
     };
