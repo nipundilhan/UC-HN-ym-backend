@@ -9,6 +9,7 @@ const userController = require('./controllers/user-controller');
 const testController = require('./controllers/test-controller');
 const modulesController = require('./controllers/modules-controller');
 const tutorialGameController = require('./controllers/module1-game1-tutorial-game-controller');
+const mindMapController = require('./controllers/module1-game2-mindmap-controller');
 const studentMoodsController = require('./controllers/student-mood-controller');
 const notificationsController = require('./controllers/notification-controller');
 
@@ -27,6 +28,7 @@ app.use(rootPath+'/user', userController);
 app.use(rootPath+'/test', testController);
 app.use(rootPath+'/modules', modulesController);
 app.use(rootPath+'/tutorial', tutorialGameController);
+app.use(rootPath+'/mindMap', mindMapController);
 app.use(rootPath+'/moods', studentMoodsController);
 app.use(rootPath+'/notifications', notificationsController);
 
