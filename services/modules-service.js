@@ -29,6 +29,11 @@ function defineStudentTaskStructure(studentData) {
                         points: (Number)            // Points assigned based on task status
                     }
                 */
+            },            
+            game2: {
+                gameCode: "GM2",
+                gamePoints: 1, // Initialize to 1 for the new entry
+                mindMaps: []
             }
         }
     };

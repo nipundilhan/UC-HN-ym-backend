@@ -104,7 +104,7 @@ async function findStudentTasksByStudentID(studentId) {
     const result = await collection.findOne(query);
 
     result.totalMarks = calculateTotalMarks(result);
-
+    //result.module1.game2.mindMaps = [];
     return result;
 }
 
