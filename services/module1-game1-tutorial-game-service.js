@@ -12,7 +12,7 @@ async function handleAddTutorial(tutorialData) {
     const collection = db.collection('studentTasks');
 
     const taskData = tutorialData.tasks[0];
-    let taskPoints = taskData.status === "completed" ? 1 : 0;
+    let taskPoints = taskData.status === "Completed" ? 1 : 0;
 
     if (tutorialData._id) {
         const studentModel = await collection.findOne({ _id: new ObjectId(tutorialData._id) });
@@ -51,7 +51,7 @@ async function handleAddTutorial(tutorialData) {
                 description: taskData.description,
                 date: taskData.date,
                 status: taskData.status,
-                completePercentage : 80,
+                // completePercentage : 80,
                 points: taskPoints, // Points assigned to the new task
             };
 
@@ -82,7 +82,7 @@ async function handleAddTutorial(tutorialData) {
             description: taskData.description,
             date: taskData.date,
             status: taskData.status,
-            completePercentage : 80,
+            // completePercentage : 80,
             points: taskPoints
         });
 
@@ -131,7 +131,7 @@ async function deleteTask(studentTaskId, taskId) {
     }
 
     // Check if the task is already completed
-    if (taskToDelete.status === "completed") {
+    if (taskToDelete.status === "Completed") {
         throw new Error('Cannot delete a completed task');
     }
 
