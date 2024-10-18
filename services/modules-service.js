@@ -32,8 +32,14 @@ function defineStudentTaskStructure(studentData) {
             },            
             game2: {
                 gameCode: "GM2",
-                gamePoints: 1, // Initialize to 1 for the new entry
+                gamePoints: 0, // Initialize to 1 for the new entry
                 mindMaps: []
+            },
+            game3: {
+                gameCode: "GM3",
+                gamePoints: 0,
+                badgeShared : "NO",
+                QandA: [] 
             }
         }
     };
