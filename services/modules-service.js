@@ -14,7 +14,7 @@ function defineStudentTaskStructure(studentData) {
         module1: {
             moduleCode: "MOD1",
             game1: {
-                gameCode: "GM1",
+                gameCode: "GM01",
                 gamePoints: 0,
                 tasks: [] // Tasks array will contain objects with the following structure:
                 /*
@@ -31,12 +31,12 @@ function defineStudentTaskStructure(studentData) {
                 */
             },            
             game2: {
-                gameCode: "GM2",
+                gameCode: "GM02",
                 gamePoints: 0, // Initialize to 1 for the new entry
                 mindMaps: []
             },
             game3: {
-                gameCode: "GM3",
+                gameCode: "GM03",
                 gamePoints: 0,
                 badgeShared : "NO",
                 QandA: [] 
@@ -62,9 +62,11 @@ async function getGameDetails(moduleCode, gameCode) {
 
 
     const game = module.games[0]; // The matched game
-    return {
+    return { 
         name: game.name,
-        achievementMargin: game.achievementMargin
+        achievementMargin1: game.achievementMargin1 !== undefined ? game.achievementMargin1 : undefined,
+        achievementMargin2: game.achievementMargin2 !== undefined ? game.achievementMargin2 : undefined,
+        likesMargin: game.likesMargin !== undefined ? game.likesMargin : undefined
     };
 
 }
@@ -73,7 +75,7 @@ async function getGameDetails(moduleCode, gameCode) {
 async function findStudentGameMarks(studentId) {
 
     const game1Details = await getGameDetails("MD01", "GM01");
-
+    const game3Details = await getGameDetails("MD01", "GM03");
 
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -103,7 +105,13 @@ async function findStudentGameMarks(studentId) {
         avatarCode : stdnt.avatarCode,
         game1CompletedTasks: result.module1.game1.tasks.length,
         game1Marks: result.module1.game1.gamePoints,
-        game1Margin: game1Details.achievementMargin,
+        game1Margin1: game1Details.achievementMargin1,
+        game1Margin2: game1Details.achievementMargin2,
+        game3Marks: result.module1.game3.gamePoints,
+        game3Likes: calculateGame3TotalLikes(result),
+        game3Margin1: game3Details.achievementMargin1,
+        game3Margin2: game3Details.achievementMargin2,
+        game3LikesMargin: game3Details.likesMargin,
         totalMarks: calculateTotalMarks(result) ,
         moods: completeMoods,
     };
@@ -118,7 +126,21 @@ async function findStudentGameMarks(studentId) {
 
 function calculateTotalMarks(result) {
     // Assuming total marks is the sum of gamePoints and other logic if needed
-    return result.module1.game1.gamePoints + result.module1.game1.gamePoints; // Replace with the actual logic if different
+    return result.module1.game1.gamePoints + result.module1.game3.gamePoints; // Replace with the actual logic if different
+}
+
+function calculateGame3TotalLikes(result) {
+    const game3 = result.module1.game3;
+
+    // Compute likesCount for each QandA and totalLikesCount for all QandA
+    let totalLikesCount = 0;
+
+    const qAndAData = game3.QandA.map(qAndA => {
+        const likesCount = qAndA.likes ? qAndA.likes.length : 0;
+        totalLikesCount += likesCount;
+    });
+
+    return totalLikesCount;
 }
 
 
