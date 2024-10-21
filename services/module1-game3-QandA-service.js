@@ -2,6 +2,26 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 const { defineStudentTaskStructure } = require('../services/modules-service');
+const { getUserById } = require('../services/user-service');
+
+function formatDate(date) {
+    // Extract the date part (yyyy-mm-dd)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Format the time part (hh:mm AM/PM)
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    };
+    const time = new Intl.DateTimeFormat('en-US', options).format(date);
+
+    // Return the full formatted date string in "yyyy-mm-dd hh:mm AM/PM" format
+    return `${year}-${month}-${day} ${time}`;
+}
+
 
 async function handleGame3QandA(studentData) {
     const db = await connectDB();
@@ -17,7 +37,7 @@ async function handleGame3QandA(studentData) {
         lessonTitle,
         question,
         answer,
-        date: new Date().toISOString().split('T')[0], // today’s date in "YYYY-MM-DD" format
+        date: formatDate(new Date()), 
         sharedStatus: "NOT_SHARED",
         likes: [],
         points: 1
@@ -137,8 +157,6 @@ async function getGame3QandAData(studentId) {
 }
 
 
-
-
 async function getSharedQandAs(studentId) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -146,18 +164,19 @@ async function getSharedQandAs(studentId) {
     // Fetch all student tasks that contain shared QandAs
     const sharedTasks = await collection.find({ "module1.game3.QandA.sharedStatus": "SHARED" }).toArray();
 
-
     let sharedQandAs = [];
 
-    // Loop through all student tasks
-    sharedTasks.forEach(studentTask => {
+    // Loop through all student tasks using for...of
+    for (const studentTask of sharedTasks) {
         const game3 = studentTask.module1.game3;
 
+        // Fetch the user data for each studentTask
+        const stdnt = await getUserById(studentTask.studentId);
+
         // Loop through the QandA array and filter shared QandAs
-        game3.QandA.forEach(qAndA => {
+        for (const qAndA of game3.QandA) {
             if (qAndA.sharedStatus === "SHARED") {
                 const likesCount = qAndA.likes ? qAndA.likes.length : 0;
-               
 
                 // Determine the 'liked' field based on the input studentId
                 let liked;
@@ -171,7 +190,9 @@ async function getSharedQandAs(studentId) {
 
                 sharedQandAs.push({
                     _id: qAndA._id,
-                    ownerStudentId : studentTask.studentId,
+                    ownerStudentId: studentTask.studentId,
+                    ownerStudentName: stdnt.username, 
+                    ownerAvatarCode : stdnt.avatarCode,
                     lessonTitle: qAndA.lessonTitle,
                     question: qAndA.question,
                     answer: qAndA.answer,
@@ -182,11 +203,18 @@ async function getSharedQandAs(studentId) {
                     points: qAndA.points
                 });
             }
-        });
-    });
+        }
+    }
 
     // Sort the filtered shared QandAs by date
-    sharedQandAs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    //sharedQandAs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sharedQandAs.sort((a, b) => {
+        // Convert the date strings back to Date objects for comparison
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA; // Sort in descending order (most recent first)
+    });
 
     // Now apply the skip and limit after filtering and sorting
     const limitedQandAs = sharedQandAs.slice(0, 1000); // Skip the first 0, limit to the next 1000
@@ -195,6 +223,8 @@ async function getSharedQandAs(studentId) {
         QandA: limitedQandAs
     };
 }
+
+
 
 async function updateSharedStatus(data) {
     const { ownerStudentId, QandAId, sharedStatus } = data;
