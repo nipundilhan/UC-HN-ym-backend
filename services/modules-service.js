@@ -45,6 +45,25 @@ function defineStudentTaskStructure(studentData) {
     };
 }
 
+function formatDate(date) {
+    // Extract the date part (yyyy-mm-dd)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Format the time part (hh:mm AM/PM)
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    };
+    const time = new Intl.DateTimeFormat('en-US', options).format(date);
+
+    // Return the full formatted date string in "yyyy-mm-dd hh:mm AM/PM" format
+    return `${year}-${month}-${day} ${time}`;
+}
+
+
 async function getGameDetails(moduleCode, gameCode) {
 
     const db = await connectDB();
@@ -181,4 +200,4 @@ function generateCompleteMoods(moods) {
 
 
 
-module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure , calculateTotalMarks};
+module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure , calculateTotalMarks ,formatDate};

@@ -1,39 +1,23 @@
 // services/module1-game3-QandA-service.js
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
-const { defineStudentTaskStructure } = require('../services/modules-service');
+const { defineStudentTaskStructure , formatDate } = require('../services/modules-service');
 const { getUserById } = require('../services/user-service');
 
-function formatDate(date) {
-    // Extract the date part (yyyy-mm-dd)
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
-    const day = String(date.getDate()).padStart(2, '0');
-
-    // Format the time part (hh:mm AM/PM)
-    const options = {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true
-    };
-    const time = new Intl.DateTimeFormat('en-US', options).format(date);
-
-    // Return the full formatted date string in "yyyy-mm-dd hh:mm AM/PM" format
-    return `${year}-${month}-${day} ${time}`;
-}
 
 
 async function handleGame3QandA(studentData) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
 
-    const { studentId, QandAId, lessonTitle, question, answer } = studentData;
+    const { studentId, QandAId, type, lessonTitle, question, answer } = studentData;
 
     // Check if the student record exists
     let studentTask = await collection.findOne({ studentId: new ObjectId(studentId) });
 
     const newQandA = {
         _id: new ObjectId(),
+        type,
         lessonTitle,
         question,
         answer,
@@ -65,6 +49,7 @@ async function handleGame3QandA(studentData) {
             // QandAId exists, so update existing QandA
             const qAndAIndex = game3.QandA.findIndex(q => q._id.equals(QandAId));
             if (qAndAIndex > -1) {
+                game3.QandA[qAndAIndex].type = type;
                 game3.QandA[qAndAIndex].lessonTitle = lessonTitle;
                 game3.QandA[qAndAIndex].question = question;
                 game3.QandA[qAndAIndex].answer = answer;
@@ -193,6 +178,7 @@ async function getSharedQandAs(studentId) {
                     ownerStudentId: studentTask.studentId,
                     ownerStudentName: stdnt.username, 
                     ownerAvatarCode : stdnt.avatarCode,
+                    type: qAndA.type,
                     lessonTitle: qAndA.lessonTitle,
                     question: qAndA.question,
                     answer: qAndA.answer,
