@@ -1,5 +1,5 @@
 // controllers/notification-controller.js
-const { addNotification, getAllNotifications , rateNotification , getNotificationsByUserId } = require('../services/notification-service');
+const { addNotification, getAllNotifications , addMessage , getAllMessages  } = require('../services/notification-service');
 const express = require('express');
 const router = express.Router();
 
@@ -10,10 +10,15 @@ router.post('/', addNotificationHandler);
 router.get('/', getNotificationsHandler);
 
 // Rate Notification Handler (LIKE/DISLIKE)
-router.put('/rate/:id/:type/:userId', rateNotificationHandler);
+//router.put('/rate/:id/:type/:userId', rateNotificationHandler);
 
 // Get notifications with rating for user
-router.get('/allWithRating/:userId', getNotificationsByUserIdHandler);
+//router.get('/allWithRating/:userId', getNotificationsByUserIdHandler);
+
+router.post('/messages', addMessageHandler);
+
+// Controller method to get all messages, ordered by the latest
+router.get('/messages', getAllMessagesHandler);
 
 // Add Notification Handler
 async function addNotificationHandler(req, res) {
@@ -39,6 +44,36 @@ async function getNotificationsHandler(req, res) {
     }
 }
 
+async function addMessageHandler(req, res) {
+    try {
+        const { title, description } = req.body;
+        
+        if (!title || !description) {
+            return res.status(400).json({ message: "Title and description are required." });
+        }
+
+        const messageData = { title, description };
+        const result = await addMessage(messageData);
+        res.status(201).json(result);
+    } catch (error) {
+        console.error('Error adding message:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+// Get All Messages Handler
+async function getAllMessagesHandler(req, res) {
+    try {
+        const messages = await getAllMessages();
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+/*
+
 // Rate Notification Handler (LIKE/DISLIKE)
 async function rateNotificationHandler(req, res) {
     const { id, type, userId } = req.params;
@@ -62,5 +97,7 @@ async function getNotificationsByUserIdHandler(req, res) {
         res.status(400).json({ message: error.message });
     }
 }
+
+*/
 
 module.exports = router;

@@ -16,6 +16,12 @@ function defineStudentTaskStructure(studentData) {
             game1: {
                 gameCode: "GM01",
                 gamePoints: 0,
+                badge1Achieved : "NO",
+                badge2Achieved : "NO",
+                badge3Achieved : "NO",
+                badge1Shared : "NO",
+                badge2Shared : "NO",
+                badge3Shared : "NO",
                 tasks: [] // Tasks array will contain objects with the following structure:
                 /*
                     Task Object Structure:
@@ -33,13 +39,35 @@ function defineStudentTaskStructure(studentData) {
             game2: {
                 gameCode: "GM02",
                 gamePoints: 0, // Initialize to 1 for the new entry
+                badge1Achieved : "NO",
+                badge2Achieved : "NO",
+                badge3Achieved : "NO",
+                badge1Shared : "NO",
+                badge2Shared : "NO",
+                badge3Shared : "NO",
                 mindMaps: []
             },
             game3: {
                 gameCode: "GM03",
                 gamePoints: 0,
-                badgeShared : "NO",
+                badge1Achieved : "NO",
+                badge2Achieved : "NO",
+                badge3Achieved : "NO",
+                badge1Shared : "NO",
+                badge2Shared : "NO",
+                badge3Shared : "NO",
                 QandA: [] 
+            },
+            game4: {
+                gameCode: "GM04",
+                gamePoints: 0,
+                badge1Achieved : "NO",
+                badge2Achieved : "NO",
+                badge3Achieved : "NO",
+                badge1Shared : "NO",
+                badge2Shared : "NO",
+                badge3Shared : "NO",
+                breathingPractises: [] 
             }
         }
     };
@@ -61,6 +89,20 @@ function formatDate(date) {
 
     // Return the full formatted date string in "yyyy-mm-dd hh:mm AM/PM" format
     return `${year}-${month}-${day} ${time}`;
+}
+
+async function findByModuleCode(moduleCode) {
+    const db = await connectDB();
+    const collection = db.collection('modules');
+
+    // Find a document with the specified moduleCode
+    const result = await collection.findOne({ moduleCode: moduleCode });
+
+    if (!result) {
+        throw new Error('Module not found');
+    }
+
+    return result;
 }
 
 
@@ -93,6 +135,8 @@ async function getGameDetails(moduleCode, gameCode) {
 
 async function findStudentGameMarks(studentId) {
 
+    const moduleDetails = await findByModuleCode("MD01");
+
     const game1Details = await getGameDetails("MD01", "GM01");
     const game3Details = await getGameDetails("MD01", "GM03");
 
@@ -122,6 +166,7 @@ async function findStudentGameMarks(studentId) {
     const response = {
         taskId : result._id,
         avatarCode : stdnt.avatarCode,
+        examDate : moduleDetails.examDate,
         game1CompletedTasks: result.module1.game1.tasks.length,
         game1Marks: result.module1.game1.gamePoints,
         game1Margin1: game1Details.achievementMargin1,
@@ -198,6 +243,37 @@ function generateCompleteMoods(moods) {
     return completeMoods;
 }
 
+async function shareBadge(studentTaskId  , gameCode , badgeCode) {
+    const db = await connectDB();
+    const collection = db.collection('studentTasks');
+
+    // change this to student id 
+    const studentTaskObjectId = new ObjectId(studentTaskId);
+
+    if( gameCode === "GM01"){
+        if( badgeCode === "BDG01"){
+            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game1.badge1Shared": "YES" } });
+        }else if ( badgeCode === "BDG02"){
+            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game1.badge2Shared": "YES" } }); 
+        }else if ( badgeCode === "BDG03"){
+            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game1.badge2Shared": "YES" } });
+        }
+    }else if ( gameCode === "GM02"){
+        if( badgeCode === "BDG01"){
+            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game2.badge1Shared": "YES" } });
+        }else if ( badgeCode === "BDG02"){
+            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game2.badge2Shared": "YES" } });
+        }else if ( badgeCode === "BDG03"){
+            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game2.badge3Shared": "YES" } });
+        }
+    }
+
+    // Update the badge1Shared field for game1 in module1
+    
+
+    return result;
+}
 
 
-module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure , calculateTotalMarks ,formatDate};
+
+module.exports = { getGameDetails , findStudentGameMarks , defineStudentTaskStructure , calculateTotalMarks ,formatDate , shareBadge};

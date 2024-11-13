@@ -18,6 +18,35 @@ function defineNotificationStructure(id, studentId, userName, avatarCode, notifi
     };
 }
 
+function defineMessageStructure(id, title, description) {
+    return {
+        _id: id ? new ObjectId(id) : new ObjectId(),
+        date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }),
+        status : "NONE",
+        title,
+        message: description
+    };
+}
+
+// Add a new message to the 'messages' collection
+async function addMessage(messageData) {
+    const db = await connectDB();
+    const collection = db.collection('messages');
+
+    const message = defineMessageStructure(null, messageData.title, messageData.description);
+    const result = await collection.insertOne(message);
+    return result;
+}
+
+// Retrieve all messages from the 'messages' collection
+async function getAllMessages() {
+    const db = await connectDB();
+    const collection = db.collection('messages');
+
+    const messages = await collection.find({}).sort({ date: -1 }).toArray();
+    return messages;
+}
+
 async function addNotification(notificationData) {
     const db = await connectDB();
     const collection = db.collection('notifications');
@@ -38,6 +67,16 @@ async function addNotification(notificationData) {
     return result;
 }
 
+async function getAllNotifications() {
+    const db = await connectDB();
+    const collection = db.collection('notifications');
+
+    // Retrieve all notifications sorted by date (latest first)
+    const notifications = await collection.find({}).sort({ date: -1 }).toArray();
+    return notifications;
+}
+
+/*
 // Rate notification (LIKE/DISLIKE)
 async function rateNotification(id, type, userId) {
     const db = await connectDB();
@@ -104,15 +143,7 @@ async function getNotificationsByUserId(userId) {
 
     return response;
 }
-
-async function getAllNotifications() {
-    const db = await connectDB();
-    const collection = db.collection('notifications');
-
-    // Retrieve all notifications sorted by date (latest first)
-    const notifications = await collection.find({}).sort({ date: -1 }).toArray();
-    return notifications;
-}
+*/
 
 // Dummy function: Replace this with your actual method to get user details
 async function getUserInfo(studentId) {
@@ -122,4 +153,4 @@ async function getUserInfo(studentId) {
     
 }
 
-module.exports = { addNotification, getAllNotifications , rateNotification ,getNotificationsByUserId };
+module.exports = { addNotification, getAllNotifications , addMessage , getAllMessages};

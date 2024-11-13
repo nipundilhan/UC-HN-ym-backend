@@ -1,6 +1,6 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
-const { calculateTotalMarks } = require('../services/modules-service');
+const { calculateTotalMarks , getGameDetails } = require('../services/modules-service');
 
 const { defineStudentTaskStructure } = require('../services/modules-service');
 
@@ -14,9 +14,19 @@ async function handleAddTutorial(tutorialData) {
     const taskData = tutorialData.tasks[0];
     let taskPoints = taskData.status === "Completed" ? 1 : 0;
 
+    const game1Details = await getGameDetails("MD01", "GM01");
+
     if (tutorialData._id) {
         const studentModel = await collection.findOne({ _id: new ObjectId(tutorialData._id) });
     
+        /*
+        let badge1Achieved = "NO"; let badge2Achieved = "NO";
+        if((taskData.status === "Completed")  &&  (studentModelmodule1.game1.gamePoints+1 >= game1Details.achievementMargin1)){
+            badge1Achieved = "YES";
+        }        
+        if((taskData.status === "Completed")  &&  (studentModelmodule1.game1.gamePoints+1 >= game1Details.achievementMargin2)){
+            badge2Achieved = "YES";
+        }*/
 
         if (taskData._id) {
             // Editing an existing task
@@ -39,6 +49,7 @@ async function handleAddTutorial(tutorialData) {
                         "module1.game1.tasks.$.points": taskPoints
                     },
                     $inc: { "module1.game1.gamePoints": taskPoints }
+                   //,$set: { "module1.game1.badge1Achieved": badge1Achieved , "module1.game1.badge2Achieved": badge2Achieved }
                 }
             );
 

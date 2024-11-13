@@ -2,7 +2,7 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 const { defineStudentTaskStructure , formatDate } = require('../services/modules-service');
-const { getUserById } = require('../services/user-service');
+const { getUserById , getByUserName } = require('../services/user-service');
 
 
 
@@ -69,6 +69,17 @@ async function handleRateQandA(studentData) {
     const collection = db.collection('studentTasks');
 
     const { ownerStudentId, QandAId, rateStudentId, rate } = studentData;
+
+    /*
+    const { ownerUserName, QandAId, rateStudentId, rate } = studentData;
+
+    // Fetch the user by username to get their ID
+    const ownerUser = await getByUserName(ownerUserName);
+    if (!ownerUser || !ownerUser._id) {
+        throw new Error('Owner user not found');
+    }
+    const ownerStudentId = ownerUser._id;
+    */
 
     // Check if the student task exists
     const studentTask = await collection.findOne({ studentId: new ObjectId(ownerStudentId) });

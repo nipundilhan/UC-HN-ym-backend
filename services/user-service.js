@@ -66,4 +66,19 @@ async function getUserById(id) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup ,getUserById };
+async function getByUserName(userName) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const user = await collection.findOne({ username: userName });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user by username: ${error.message}`);
+    }
+}
+
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup ,getUserById  , getByUserName};

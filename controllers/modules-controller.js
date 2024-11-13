@@ -1,10 +1,11 @@
 const express = require('express');
-const { getGameDetails,findStudentGameMarks  } = require('../services/modules-service');
+const { getGameDetails,findStudentGameMarks , shareBadge  } = require('../services/modules-service');
 
 const router = express.Router();
 
 router.get('/game-details', getGameDetailsHandler);
 router.get('/findPointsByStudent/:id', findgamePointsByStudentID);
+router.post('/shareBadge/:studentTaskId/:gameCode/:badgeCode', shareStudentadge);
 
 // Controller method to handle the GET request for game details
 async function getGameDetailsHandler(req, res) {
@@ -37,6 +38,24 @@ async function findgamePointsByStudentID(req, res) {
         }
     } catch (error) {
         console.error('Error updating country:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function shareStudentadge(req, res) {
+    try {
+        const { studentTaskId , gameCode , badgeCode } = req.params;
+
+        // Call the service function to update the badge sharing status
+        const result = await shareBadge(studentTaskId , gameCode , badgeCode );
+
+        if (result.modifiedCount > 0) {
+            res.status(200).json({ message: 'Badge shared successfully' });
+        } else {
+            res.status(404).json({ message: 'Student task not found or badge already shared' });
+        }
+    } catch (error) {
+        console.error('Error sharing badge:', error);
         res.status(400).json({ message: error.message });
     }
 }
