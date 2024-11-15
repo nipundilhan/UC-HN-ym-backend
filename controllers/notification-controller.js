@@ -46,13 +46,15 @@ async function getNotificationsHandler(req, res) {
 
 async function addMessageHandler(req, res) {
     try {
-        const { title, description } = req.body;
+        const { _id , title, description, status } = req.body;
         
+        /*
         if (!title || !description) {
             return res.status(400).json({ message: "Title and description are required." });
         }
+        */
 
-        const messageData = { title, description };
+        const messageData = {  _id , title, description , status };
         const result = await addMessage(messageData);
         res.status(201).json(result);
     } catch (error) {

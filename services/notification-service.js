@@ -18,11 +18,11 @@ function defineNotificationStructure(id, studentId, userName, avatarCode, notifi
     };
 }
 
-function defineMessageStructure(id, title, description) {
+function defineMessageStructure(id, title, description , status) {
     return {
         _id: id ? new ObjectId(id) : new ObjectId(),
         date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }),
-        status : "NONE",
+        status : status,
         title,
         message: description
     };
@@ -33,9 +33,27 @@ async function addMessage(messageData) {
     const db = await connectDB();
     const collection = db.collection('messages');
 
-    const message = defineMessageStructure(null, messageData.title, messageData.description);
-    const result = await collection.insertOne(message);
-    return result;
+    if (messageData._id) {
+        // Update existing message
+        const filter = { _id: new ObjectId(messageData._id) };
+        const update = {
+            $set: {
+                title: messageData.title,
+                message: messageData.description,
+                status: messageData.status,
+                //date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',  hour12: true }),
+            },
+        };
+
+        const result = await collection.updateOne(filter, update);
+        return { action: 'updated'};
+    } else {
+        // Create a new message
+        const message = defineMessageStructure(null, messageData.title, messageData.description ,messageData.status);
+
+        const result = await collection.insertOne(message);
+        return { action: 'created' };
+    }
 }
 
 // Retrieve all messages from the 'messages' collection
