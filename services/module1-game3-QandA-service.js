@@ -68,9 +68,9 @@ async function handleRateQandA(studentData) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
 
-    const { ownerStudentId, QandAId, rateStudentId, rate } = studentData;
+   // const { ownerStudentId, QandAId, rateStudentId, rate } = studentData;
 
-    /*
+    
     const { ownerUserName, QandAId, rateStudentId, rate } = studentData;
 
     // Fetch the user by username to get their ID
@@ -79,7 +79,7 @@ async function handleRateQandA(studentData) {
         throw new Error('Owner user not found');
     }
     const ownerStudentId = ownerUser._id;
-    */
+    
 
     // Check if the student task exists
     const studentTask = await collection.findOne({ studentId: new ObjectId(ownerStudentId) });
@@ -186,7 +186,7 @@ async function getSharedQandAs(studentId) {
 
                 sharedQandAs.push({
                     _id: qAndA._id,
-                    ownerStudentId: studentTask.studentId,
+                    // ownerStudentId: studentTask.studentId,
                     ownerStudentName: stdnt.username, 
                     ownerAvatarCode : stdnt.avatarCode,
                     type: qAndA.type,
