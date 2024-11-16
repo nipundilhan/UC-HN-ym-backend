@@ -12,6 +12,7 @@ function defineUserStructure(id, userData, userRole) {
         email: userData.email,
         password: userData.password,
         avatarCode :userData.avatarCode,
+        signupDate: new Date().toISOString().split('T')[0], // Format: YYYY-MM-DD
     };
 }
 
@@ -33,6 +34,34 @@ async function createUserStudent(userData) {
 
     const result = await collection.insertOne(user);
     return result;
+}
+
+async function updateStudent(userData) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    if (!userData._id) {
+        throw new Error('User ID is required for updating a student.');
+    }
+
+    const filter = { _id: new ObjectId(userData._id) };
+    const update = {
+        $set: {
+            gender: userData.gender,
+            dob: userData.dob,
+            avatarCode: userData.avatarCode,
+        },
+    };
+
+    const result = await collection.updateOne(filter, update);
+
+    if (result.matchedCount === 0) {
+        throw new Error('User not found.');
+    }
+
+    return {
+        status: "Updated"
+    };
 }
 
 async function handleUserSignup(userDetails) {
@@ -81,4 +110,4 @@ async function getByUserName(userName) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup ,getUserById  , getByUserName};
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup ,getUserById  , getByUserName , updateStudent};

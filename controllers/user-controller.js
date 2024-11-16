@@ -1,12 +1,13 @@
 const { verifyToken } = require('../middlewares/auth-middleware');
 const express = require('express');
-const { handleUserSignup } = require('../services/user-service');
+const { handleUserSignup , updateStudent} = require('../services/user-service');
 
 const router = express.Router();
 
 router.get('/protected', verifyToken, protected);
 router.get('/get-username', verifyToken, getUsername);
 router.post('/signup', signup);
+router.put('/update-student', verifyToken, updateStudentHandler); 
 
 
 // Controller method to handle protected route
@@ -35,6 +36,25 @@ async function signup(req, res) {
         res.status(201).json(newUser);
     } catch (error) {
         console.error('Error signing up user:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+// Controller method for updating a student
+async function updateStudentHandler(req, res) {
+    try {
+        const { _id, gender, dob, avatarCode } = req.body;
+
+        if (!_id || !gender || !dob || !avatarCode) {
+            return res.status(400).json({ message: "All fields (_id, gender, dob, avatarCode) are required." });
+        }
+
+        // Call the service layer to update the student
+        const result = await updateStudent({ _id, gender, dob, avatarCode });
+
+        res.status(200).json({ message: "Student updated successfully.", result });
+    } catch (error) {
+        console.error('Error updating student:', error);
         res.status(400).json({ message: error.message });
     }
 }
