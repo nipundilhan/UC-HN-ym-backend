@@ -46,7 +46,7 @@ async function getNotificationsHandler(req, res) {
 
 async function addMessageHandler(req, res) {
     try {
-        const { _id , title, message, status } = req.body;
+        const { id , title, message, status } = req.body;
         
         /*
         if (!title || !description) {
@@ -54,7 +54,7 @@ async function addMessageHandler(req, res) {
         }
         */
 
-        const messageData = {  _id , title, message , status };
+        const messageData = {  id , title, message , status };
         const result = await addMessage(messageData);
         res.status(201).json(result);
     } catch (error) {
