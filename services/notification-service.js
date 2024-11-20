@@ -10,11 +10,9 @@ function defineNotificationStructure(id, studentId, userName, avatarCode, notifi
         userName,
         avatarCode,
         date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }),
-        notificationType: notificationData.notificationType,
         title: notificationData.title,
         description: notificationData.description,
-        reference: notificationData.reference,
-        likes: [] // initialize likes with 0
+        reference: notificationData.reference
     };
 }
 
@@ -39,7 +37,7 @@ async function addMessage(messageData) {
         const update = {
             $set: {
                 title: messageData.title,
-                message: messageData.description,
+                message: messageData.message,
                 status: messageData.status,
                 //date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',  hour12: true }),
             },
@@ -49,7 +47,7 @@ async function addMessage(messageData) {
         return { action: 'updated'};
     } else {
         // Create a new message
-        const message = defineMessageStructure(null, messageData.title, messageData.description ,messageData.status);
+        const message = defineMessageStructure(null, messageData.title, messageData.message ,messageData.status);
 
         const result = await collection.insertOne(message);
         return { action: 'created' };
@@ -72,11 +70,9 @@ async function addNotification(notificationData) {
     // /* this is the space to get the userName , avatarCode using studentId */
     const stdnt = await getUserById(notificationData.studentId);
 
-    if (notificationData.notificationType === 'BADGE') {
-        notificationData.description = 'You have shared a badge';
-    } else if (notificationData.notificationType === 'MINDMAP') {
-        notificationData.description = 'You have shared a mindmap';
-    }
+
+    //notificationData.description = 'You have achieved a badge';
+
 
     // Define notification structure
     const notification = defineNotificationStructure(null, notificationData.studentId, stdnt.username, stdnt.avatarCode, notificationData);
