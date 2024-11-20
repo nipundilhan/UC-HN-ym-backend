@@ -15,6 +15,7 @@ async function addBreathingPractice(studentData) {
         date: todayDate,
         techniqueCode: studentData.techniqueCode,
         cycles: studentData.cycles,
+        time: studentData.time,
         points: 1
     };
 
