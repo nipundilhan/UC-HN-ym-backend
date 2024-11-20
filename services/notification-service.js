@@ -31,9 +31,9 @@ async function addMessage(messageData) {
     const db = await connectDB();
     const collection = db.collection('messages');
 
-    if (messageData.id) {
+    if (messageData._id) {
         // Update existing message
-        const filter = { _id: new ObjectId(messageData.id) };
+        const filter = { _id: new ObjectId(messageData._id) };
         const update = {
             $set: {
                 title: messageData.title,
