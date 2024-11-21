@@ -68,6 +68,17 @@ function defineStudentTaskStructure(studentData) {
                 badge2Shared : "NO",
                 badge3Shared : "NO",
                 breathingPractises: [] 
+            },
+            game5: {
+                gameCode: "GM05",
+                gamePoints: 0,
+                // badge1Achieved : "NO",
+                // badge2Achieved : "NO",
+                // badge3Achieved : "NO",
+                badge1Shared : "NO",
+                badge2Shared : "NO",
+                badge3Shared : "NO",
+                journalLogs: [] 
             }
         }
     };
@@ -138,7 +149,9 @@ async function findStudentGameMarks(studentId) {
     const moduleDetails = await findByModuleCode("MD01");
 
     const game1Details = await getGameDetails("MD01", "GM01");
+    const game2Details = await getGameDetails("MD01", "GM02");
     const game3Details = await getGameDetails("MD01", "GM03");
+    const game4Details = await getGameDetails("MD01", "GM04");
 
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -167,7 +180,8 @@ async function findStudentGameMarks(studentId) {
         taskId : result._id,
         avatarCode : stdnt.avatarCode,
         examDate : moduleDetails.examDate,
-        game1CompletedTasks: result.module1.game1.tasks.length,
+        //game1CompletedTasks: result.module1.game1.tasks.length,
+        game1CompletedTasks: result.module1.game1.gamePoints,
         game1Marks: result.module1.game1.gamePoints,
         game1Margin1: game1Details.achievementMargin1,
         game1Margin2: game1Details.achievementMargin2,
@@ -176,6 +190,9 @@ async function findStudentGameMarks(studentId) {
         game3Margin1: game3Details.achievementMargin1,
         game3Margin2: game3Details.achievementMargin2,
         game3LikesMargin: game3Details.likesMargin,
+        game4Marks: result.module1.game4.gamePoints,
+        game4Margin1: game4Details.achievementMargin1,
+        game4Margin2: game4Details.achievementMargin2,
         totalMarks: calculateTotalMarks(result) ,
         moods: completeMoods,
     };
@@ -190,7 +207,7 @@ async function findStudentGameMarks(studentId) {
 
 function calculateTotalMarks(result) {
     // Assuming total marks is the sum of gamePoints and other logic if needed
-    return result.module1.game1.gamePoints + result.module1.game3.gamePoints; // Replace with the actual logic if different
+    return result.module1.game1.gamePoints + result.module1.game3.gamePoints+ result.module1.game4.gamePoints; // Replace with the actual logic if different
 }
 
 function calculateGame3TotalLikes(result) {
