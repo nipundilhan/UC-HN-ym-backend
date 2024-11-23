@@ -14,6 +14,7 @@ const QandAController = require('./controllers/module1-game3-QandA-controller');
 const studentMoodsController = require('./controllers/student-mood-controller');
 const notificationsController = require('./controllers/notification-controller');
 const breathingPractiseController = require('./controllers/module1-game4-breathing-controller');
+const journalController = require('./controllers/module1-game5-journal-controller');
 
 // Initialize Express app
 const app = express();
@@ -35,6 +36,7 @@ app.use(rootPath+'/QandA', QandAController);
 app.use(rootPath+'/moods', studentMoodsController);
 app.use(rootPath+'/notifications', notificationsController);
 app.use(rootPath+'/breathing', breathingPractiseController);
+app.use(rootPath+'/journal', journalController);
 
 // hand over the errors to error handler
 app.use(errorHandler);
