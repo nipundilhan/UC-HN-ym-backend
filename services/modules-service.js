@@ -168,7 +168,7 @@ async function findStudentGameMarks(studentId) {
 
 
     
-    const stdnt = await getUserById(studentId);
+   const stdnt = await getUserByIdLocal(studentId);
         
 
 
@@ -203,6 +203,21 @@ async function findStudentGameMarks(studentId) {
     }
 
     return response;
+}
+
+async function getUserByIdLocal(id) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const user = await collection.findOne({ _id: new ObjectId(id) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user: ${error.message}`);
+    }
 }
 
 function calculateTotalMarks(result) {
