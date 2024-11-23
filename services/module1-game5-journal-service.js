@@ -85,8 +85,8 @@ async function findJournalLogsByStudentId(studentId) {
 
     const studentTask = await collection.findOne({ studentId: new ObjectId(studentId) });
 
-    if (!studentTask || !studentTask.module1?.game5?.journalLogs) {
-        throw new Error('Journal logs not found');
+    if (!studentTask ) {
+        throw new Error('student record not found');
     }
 
     // Decrypt answers before returning

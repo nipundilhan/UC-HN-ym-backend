@@ -1,6 +1,7 @@
 // services/userService.js
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
+const { defineStudentTaskStructure  } = require('../services/modules-service');
 
 function defineUserStructure(id, userData, userRole) {
     return {
@@ -33,6 +34,13 @@ async function createUserStudent(userData) {
     const user = defineUserStructure(null, userData , "STUDENT");
 
     const result = await collection.insertOne(user);
+
+
+    const collection1 = db.collection('studentTasks');
+    const dummyData = { studentName: userData.username, studentId: result.insertedId };   
+    let studentTask = defineStudentTaskStructure(dummyData);
+    await collection1.insertOne(studentTask);
+
     return result;
 }
 

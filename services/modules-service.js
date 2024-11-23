@@ -8,7 +8,7 @@ function defineStudentTaskStructure(studentData) {
     
     return {
         _id :  new ObjectId(),
-        studentName: studentData.studentName || "",
+        studentName: studentData.studentName,
         studentId: new ObjectId(studentData.studentId),
         moods: [],
         module1: {
