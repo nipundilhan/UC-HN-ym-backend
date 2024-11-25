@@ -152,6 +152,7 @@ async function findStudentGameMarks(studentId) {
     const game2Details = await getGameDetails("MD01", "GM02");
     const game3Details = await getGameDetails("MD01", "GM03");
     const game4Details = await getGameDetails("MD01", "GM04");
+    const game5Details = await getGameDetails("MD01", "GM05");
 
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -176,15 +177,22 @@ async function findStudentGameMarks(studentId) {
     // Generate complete moods array (recorded + missing days)
     const completeMoods = generateCompleteMoods(result.moods);
 
+    
     const response = {
         taskId : result._id,
         avatarCode : stdnt.avatarCode,
         examDate : moduleDetails.examDate,
+        totalMarks: calculateTotalMarks(result) ,
         //game1CompletedTasks: result.module1.game1.tasks.length,
         game1CompletedTasks: result.module1.game1.gamePoints,
         game1Marks: result.module1.game1.gamePoints,
         game1Margin1: game1Details.achievementMargin1,
         game1Margin2: game1Details.achievementMargin2,
+        game2Marks: result.module1.game2.gamePoints,
+        game2Likes: calculateGame3TotalLikes(result),
+        game2Margin1: game2Details.achievementMargin1,
+        game2Margin2: game2Details.achievementMargin2,
+        game2LikesMargin: game2Details.likesMargin,
         game3Marks: result.module1.game3.gamePoints,
         game3Likes: calculateGame3TotalLikes(result),
         game3Margin1: game3Details.achievementMargin1,
@@ -193,9 +201,58 @@ async function findStudentGameMarks(studentId) {
         game4Marks: result.module1.game4.gamePoints,
         game4Margin1: game4Details.achievementMargin1,
         game4Margin2: game4Details.achievementMargin2,
-        totalMarks: calculateTotalMarks(result) ,
+        game5Marks: result.module1.game5.gamePoints,
+        game5Margin1: game5Details.achievementMargin1,
+        game5Margin2: game5Details.achievementMargin2,
+        game5badge1Shared: result.module1.game5.badge1Shared,
+        game5badge2Shared: result.module1.game5.badge2Shared,
+        game5badge3Shared: result.module1.game5.badge3Shared,
         moods: completeMoods,
     };
+    
+    /*
+
+    const response = {
+        taskId: result._id,
+        avatarCode: stdnt.avatarCode,
+        examDate: moduleDetails.examDate,
+        totalMarks: calculateTotalMarks(result),
+        game1: {
+            game1CompletedTasks: result.module1.game1.gamePoints,
+            Marks: result.module1.game1.gamePoints,
+            Margin1: game1Details.achievementMargin1,
+            Margin2: game1Details.achievementMargin2,
+        },
+        game2: {
+            Marks: result.module1.game2.gamePoints,
+            Likes: calculateGame3TotalLikes(result),
+            Margin1: game2Details.achievementMargin1,
+            Margin2: game2Details.achievementMargin2,
+            LikesMargin: game2Details.likesMargin,
+        },
+        game3: {
+            game3Marks: result.module1.game3.gamePoints,
+            game3Likes: calculateGame3TotalLikes(result),
+            game3Margin1: game3Details.achievementMargin1,
+            game3Margin2: game3Details.achievementMargin2,
+            game3LikesMargin: game3Details.likesMargin,
+        },
+        game4: {
+            game4Marks: result.module1.game4.gamePoints,
+            game4Margin1: game4Details.achievementMargin1,
+            game4Margin2: game4Details.achievementMargin2,
+        },
+        game5: {
+            game5Marks: result.module1.game5.gamePoints,
+            game5Margin1: game5Details.achievementMargin1,
+            game5Margin2: game5Details.achievementMargin2,
+            game5badge1Shared: result.module1.game5.badge1Shared,
+            game5badge2Shared: result.module1.game5.badge2Shared,
+            game5badge3Shared: result.module1.game5.badge3Shared,
+        },
+        moods: completeMoods,
+    };
+    */
 
     // Check if game2 exists before adding it to the response
     if (result.module1.game2) {
@@ -222,7 +279,7 @@ async function getUserByIdLocal(id) {
 
 function calculateTotalMarks(result) {
     // Assuming total marks is the sum of gamePoints and other logic if needed
-    return result.module1.game1.gamePoints + result.module1.game3.gamePoints+ result.module1.game4.gamePoints; // Replace with the actual logic if different
+    return result.module1.game1.gamePoints + result.module1.game3.gamePoints+ result.module1.game4.gamePoints+ result.module1.game5.gamePoints;; // Replace with the actual logic if different
 }
 
 function calculateGame3TotalLikes(result) {
