@@ -3,14 +3,12 @@ const { ObjectId } = require('mongodb');
 const connectDB = require('../config/db');
 const { getUserById } = require('../services/user-service');
 
-function defineNotificationStructure(id, studentId, userName, avatarCode, notificationData) {
+function defineNotificationStructure(id, userName, avatarCode, notificationData) {
     return {
         _id: id ? new ObjectId(id) : new ObjectId(),
-        studentId: new ObjectId(studentId),
         userName,
         avatarCode,
         date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }),
-        title: notificationData.title,
         description: notificationData.description,
         reference: notificationData.reference
     };
@@ -68,17 +66,33 @@ async function addNotification(notificationData) {
     const collection = db.collection('notifications');
 
     // /* this is the space to get the userName , avatarCode using studentId */
-    const stdnt = await getUserById(notificationData.studentId);
+    const stdnt = await getUserByIdLocal(notificationData.studentId);
 
 
-    //notificationData.description = 'You have achieved a badge';
+    notificationData.description = stdnt.username +' have achieved '+ notificationData.reference + " badge" ;
 
 
     // Define notification structure
-    const notification = defineNotificationStructure(null, notificationData.studentId, stdnt.username, stdnt.avatarCode, notificationData);
+    const notification = defineNotificationStructure(null, stdnt.username, stdnt.avatarCode, notificationData);
 
     const result = await collection.insertOne(notification);
     return result;
+}
+
+
+async function getUserByIdLocal(id) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const user = await collection.findOne({ _id: new ObjectId(id) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user: ${error.message}`);
+    }
 }
 
 async function getAllNotifications() {

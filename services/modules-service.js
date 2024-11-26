@@ -2,6 +2,7 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 const { getUserById } = require('../services/user-service');
+const { addNotification } = require('../services/notification-service');
 
 // Define the structure of the studentTask when a new one is created
 function defineStudentTaskStructure(studentData) {
@@ -332,30 +333,54 @@ function generateCompleteMoods(moods) {
     return completeMoods;
 }
 
-async function shareBadge(studentTaskId  , gameCode , badgeCode) {
+async function shareBadge(data) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
 
     // change this to student id 
-    const studentTaskObjectId = new ObjectId(studentTaskId);
+    //const studentTaskObjectId = new ObjectId(studentTaskId);
+    let studentTask = await collection.findOne({ studentId: new ObjectId(data.studentId) });
 
-    if( gameCode === "GM01"){
-        if( badgeCode === "BDG01"){
-            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game1.badge1Shared": "YES" } });
-        }else if ( badgeCode === "BDG02"){
-            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game1.badge2Shared": "YES" } }); 
-        }else if ( badgeCode === "BDG03"){
-            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game1.badge2Shared": "YES" } });
+    //
+
+ 
+
+    const badgePath = `module1.${data.gameCode.toLowerCase()}.${data.badgeCode.toLowerCase()}Shared`;
+
+    console.log(badgePath);
+    // Update the badge sharing status
+    const result = await collection.updateOne(
+        { studentId: new ObjectId(data.studentId) },
+        { $set: { [badgePath]: "YES" } }
+    );
+
+ 
+
+    /*
+
+    let result = null;
+
+    if( data.gameCode === "GM01"){
+        if( data.badgeCode === "BDG01"){
+            result = await collection.updateOne({ studentId: new ObjectId(data.studentId) },{ $set: { "module1.game1.badge1Shared": "YES" } });
+
+        }else if ( data.badgeCode === "BDG02"){
+            result = await collection.updateOne({ studentId: new ObjectId(data.studentId) },{ $set: { "module1.game1.badge2Shared": "YES" } }); 
+        }else if ( data.badgeCode === "BDG03"){
+            result = await collection.updateOne({ studentId: new ObjectId(data.studentId) },{ $set: { "module1.game1.badge2Shared": "YES" } });
         }
-    }else if ( gameCode === "GM02"){
-        if( badgeCode === "BDG01"){
-            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game2.badge1Shared": "YES" } });
-        }else if ( badgeCode === "BDG02"){
-            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game2.badge2Shared": "YES" } });
-        }else if ( badgeCode === "BDG03"){
-            const result = await collection.updateOne({ _id: studentTaskObjectId },{ $set: { "module1.game2.badge3Shared": "YES" } });
+    }else if ( data.gameCode === "GM02"){
+        if( data.badgeCode === "BDG01"){
+            result = await collection.updateOne({ studentId: new ObjectId(data.studentId) },{ $set: { "module1.game2.badge1Shared": "YES" } });
+        }else if ( data.badgeCode === "BDG02"){
+            result = await collection.updateOne({ studentId: new ObjectId(data.studentId) },{ $set: { "module1.game2.badge2Shared": "YES" } });
+        }else if ( data.badgeCode === "BDG03"){
+            result = await collection.updateOne({ studentId: new ObjectId(data.studentId) },{ $set: { "module1.game2.badge3Shared": "YES" } });
         }
     }
+        */
+
+    addNotification(data);
 
     // Update the badge1Shared field for game1 in module1
     

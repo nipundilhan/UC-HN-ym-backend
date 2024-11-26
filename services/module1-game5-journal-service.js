@@ -85,16 +85,18 @@ async function findJournalLogsByStudentId(studentId) {
 
     const studentTask = await collection.findOne({ studentId: new ObjectId(studentId) });
 
-    if (!studentTask ) {
-        throw new Error('student record not found');
+    if (!studentTask) {
+        throw new Error('Student record not found');
     }
 
-    // Decrypt answers before returning
-    studentTask.module1.game5.journalLogs = studentTask.module1.game5.journalLogs.map(log => ({
-        ...log,
-        answer1: decrypt(log.answer1),
-        answer2: decrypt(log.answer2),
-    }));
+    // Sort and decrypt journal logs before returning
+    studentTask.module1.game5.journalLogs = studentTask.module1.game5.journalLogs
+        .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by date in descending order
+        .map(log => ({
+            ...log,
+            answer1: decrypt(log.answer1),
+            answer2: decrypt(log.answer2),
+        }));
 
     return studentTask.module1.game5;
 }

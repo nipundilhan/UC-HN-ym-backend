@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/game-details', getGameDetailsHandler);
 router.get('/findPointsByStudent/:id', findgamePointsByStudentID);
-router.post('/shareBadge/:studentTaskId/:gameCode/:badgeCode', shareStudentadge);
+router.post('/shareBadge', shareStudentadge);
 
 // Controller method to handle the GET request for game details
 async function getGameDetailsHandler(req, res) {
@@ -44,10 +44,10 @@ async function findgamePointsByStudentID(req, res) {
 
 async function shareStudentadge(req, res) {
     try {
-        const { studentTaskId , gameCode , badgeCode } = req.params;
+        const data = req.body;
 
         // Call the service function to update the badge sharing status
-        const result = await shareBadge(studentTaskId , gameCode , badgeCode );
+        const result = await shareBadge(data );
 
         if (result.modifiedCount > 0) {
             res.status(200).json({ message: 'Badge shared successfully' });
