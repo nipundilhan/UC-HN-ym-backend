@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMindMap , getGame2Details } = require('../services/module1-game2-mindmap-service');
+const { addMindMap , getGame2Details , updateSharedStatus , getSharedMindMaps , handleRateMindMaps } = require('../services/module1-game2-mindmap-service');
 const router = express.Router();
 const multer = require('multer');
 
@@ -49,7 +49,49 @@ router.get('/:studentId', async (req, res) => {
 });
 
 
+router.put('/share', async (req, res) => {
+    try {
+        const { ownerStudentId, mindMapId, sharedStatus } = req.body;
 
+        // Call service layer to update the shared status
+        const result = await updateSharedStatus({ ownerStudentId, mindMapId, sharedStatus });
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error updating shared status:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
+
+router.get('/sharedMindMaps/:studentId', async (req, res) => {
+    try {
+        const { studentId } = req.params;
+
+        // Call the service to get all shared QandAs
+        const sharedQandAData = await getSharedMindMaps(studentId);
+
+        res.status(200).json({ message: 'Shared QandA data retrieved successfully', data: sharedQandAData });
+    } catch (error) {
+        console.error('Error fetching shared QandA data:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
+
+router.post('/rate', async (req, res) => {
+    try {
+        const studentData = req.body;
+
+        // Call service layer to handle the rating
+        const updatedStudentTask = await handleRateMindMaps(studentData);
+
+        res.status(200).json({ message: 'Rating processed successfully'});
+    } catch (error) {
+        console.error('Error processing rating:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
 
 
 module.exports = router;

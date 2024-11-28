@@ -2,7 +2,7 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 const { defineStudentTaskStructure , formatDate } = require('../services/modules-service');
-const { getUserById , getByUserName } = require('../services/user-service');
+const {  getByUserName } = require('../services/user-service');
 
 
 
@@ -167,7 +167,7 @@ async function getSharedQandAs(studentId) {
         const game3 = studentTask.module1.game3;
 
         // Fetch the user data for each studentTask
-        const stdnt = await getUserById(studentTask.studentId);
+        const stdnt = await getUserByIdLocal(studentTask.studentId);
 
         // Loop through the QandA array and filter shared QandAs
         for (const qAndA of game3.QandA) {
@@ -257,6 +257,21 @@ async function updateSharedStatus(data) {
         message: 'Shared status updated successfully',
         updatedQandA: game3.QandA[qAndAIndex]
     };
+}
+
+async function getUserByIdLocal(id) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const user = await collection.findOne({ _id: new ObjectId(id) });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        return user;
+    } catch (error) {
+        throw new Error(`Error fetching user: ${error.message}`);
+    }
 }
 
 

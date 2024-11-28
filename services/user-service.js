@@ -88,6 +88,7 @@ async function handleUserSignup(userDetails) {
     return newUser;
 }
 
+/*
 async function getUserById(id) {
     const db = await connectDB();
     const collection = db.collection('users');
@@ -102,6 +103,7 @@ async function getUserById(id) {
         throw new Error(`Error fetching user: ${error.message}`);
     }
 }
+*/
 
 async function getByUserName(userName) {
     const db = await connectDB();
@@ -118,4 +120,4 @@ async function getByUserName(userName) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup ,getUserById  , getByUserName , updateStudent};
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent};
