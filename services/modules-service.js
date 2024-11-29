@@ -1,7 +1,6 @@
 // services/moduleService.js
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
-const { getUserById } = require('../services/user-service');
 const { addNotification } = require('../services/notification-service');
 
 // Define the structure of the studentTask when a new one is created
@@ -190,7 +189,7 @@ async function findStudentGameMarks(studentId) {
         game1Margin1: game1Details.achievementMargin1,
         game1Margin2: game1Details.achievementMargin2,
         game2Marks: result.module1.game2.gamePoints,
-        game2Likes: calculateGame3TotalLikes(result),
+        game2Likes: calculateGame2TotalLikes(result),
         game2Margin1: game2Details.achievementMargin1,
         game2Margin2: game2Details.achievementMargin2,
         game2LikesMargin: game2Details.likesMargin,
@@ -280,7 +279,7 @@ async function getUserByIdLocal(id) {
 
 function calculateTotalMarks(result) {
     // Assuming total marks is the sum of gamePoints and other logic if needed
-    return result.module1.game1.gamePoints + result.module1.game3.gamePoints+ result.module1.game4.gamePoints+ result.module1.game5.gamePoints;; // Replace with the actual logic if different
+    return result.module1.game1.gamePoints + result.module1.game2.gamePoints+ result.module1.game3.gamePoints+ result.module1.game4.gamePoints+ result.module1.game5.gamePoints;; // Replace with the actual logic if different
 }
 
 function calculateGame3TotalLikes(result) {
@@ -291,6 +290,20 @@ function calculateGame3TotalLikes(result) {
 
     const qAndAData = game3.QandA.map(qAndA => {
         const likesCount = qAndA.likes ? qAndA.likes.length : 0;
+        totalLikesCount += likesCount;
+    });
+
+    return totalLikesCount;
+}
+
+function calculateGame2TotalLikes(result) {
+    const game3 = result.module1.game2;
+
+    // Compute likesCount for each QandA and totalLikesCount for all QandA
+    let totalLikesCount = 0;
+
+    const qAndAData = game3.mindMaps.map(mM => {
+        const likesCount = mM.likes ? mM.likes.length : 0;
         totalLikesCount += likesCount;
     });
 
