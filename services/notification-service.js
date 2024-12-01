@@ -1,7 +1,7 @@
 // services/notification-service.js
 const { ObjectId } = require('mongodb');
 const connectDB = require('../config/db');
-const { getUserById } = require('../services/user-service');
+
 
 function defineNotificationStructure(id, userName, avatarCode, notificationData) {
     return {
@@ -177,7 +177,7 @@ async function getNotificationsByUserId(userId) {
 async function getUserInfo(studentId) {
     // Assuming this returns the userName and avatarCode based on studentId
 
-    const stdnt = await getUserById(notificationData.studentId);
+    //const stdnt = await getUserById(notificationData.studentId);
     
 }
 
