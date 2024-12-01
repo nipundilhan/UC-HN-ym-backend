@@ -335,7 +335,7 @@ async function handleRateMindMaps(studentData) {
         } else if (rate === 'DISLIKE') {
             // Use $pull to remove rateStudentId from likes if present
             await collection.updateOne(
-                { studentId: new ObjectId(ownerStudentId), 'module1.game2.mindMaps._id': new ObjectId(QandAId) },
+                { studentId: new ObjectId(ownerStudentId), 'module1.game2.mindMaps._id': new ObjectId(mindMapId) },
                 { $pull: { 'module1.game2.mindMaps.$.likes': rateStudentId } }
             );
         }
