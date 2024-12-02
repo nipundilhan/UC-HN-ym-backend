@@ -14,7 +14,7 @@ async function handleAddTutorial(tutorialData) {
     const taskData = tutorialData.tasks[0];
     let taskPoints = taskData.status === "Completed" ? 1 : 0;
 
-    const game1Details = await getGameDetails("MD01", "GM01");
+    //const game1Details = await getGameDetails("MD01", "GM01");
 
     if (tutorialData._id) {
         const studentModel = await collection.findOne({ _id: new ObjectId(tutorialData._id) });
