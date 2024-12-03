@@ -69,7 +69,7 @@ async function addNotification(notificationData) {
     const stdnt = await getUserByIdLocal(notificationData.studentId);
 
 
-    notificationData.description = stdnt.username +' have achieved '+ notificationData.reference + " badge" ;
+    notificationData.description = ' unlocked '+ notificationData.reference + " badge" ;
 
 
     // Define notification structure
@@ -100,7 +100,11 @@ async function getAllNotifications() {
     const collection = db.collection('notifications');
 
     // Retrieve all notifications sorted by date (latest first)
-    const notifications = await collection.find({}).sort({ date: -1 }).toArray();
+    const notifications = await collection.find({})
+        .sort({ date: -1 })
+        .limit(102)
+        .toArray();
+
     return notifications;
 }
 

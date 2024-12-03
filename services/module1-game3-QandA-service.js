@@ -214,7 +214,7 @@ async function getSharedQandAs(studentId) {
     });
 
     // Now apply the skip and limit after filtering and sorting
-    const limitedQandAs = sharedQandAs.slice(0, 1000); // Skip the first 0, limit to the next 1000
+    const limitedQandAs = sharedQandAs.slice(0, 102); // Skip the first 0, limit to the next 1000
 
     return {
         QandA: limitedQandAs
