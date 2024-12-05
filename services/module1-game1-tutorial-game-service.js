@@ -114,7 +114,10 @@ async function findStudentTasksByStudentID(studentId) {
     // Find the first document with the matching studentId
     const result = await collection.findOne(query);
 
-    result.totalMarks = calculateTotalMarks(result);
+    //result.totalMarks = calculateTotalMarks(result);
+    result.module1.game1.tasks = result.module1.game1.tasks
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
     //result.module1.game2.mindMaps = [];
     return result;
 }
