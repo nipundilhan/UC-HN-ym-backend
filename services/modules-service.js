@@ -215,8 +215,8 @@ async function findStudentGameMarks(studentId) {
         game4Margin2: game4Details.achievementMargin2,
         game4Badge1Shared: result.module1.game4.badge1Shared,
         game4Badge2Shared: result.module1.game4.badge1Shared,
-        game4Badge3Shared: result.module1.game43.badge1Shared,
-        
+        game4Badge3Shared: result.module1.game4.badge1Shared,
+
         game5Marks: result.module1.game5.gamePoints,
         game5Margin1: game5Details.achievementMargin1,
         game5Margin2: game5Details.achievementMargin2,
