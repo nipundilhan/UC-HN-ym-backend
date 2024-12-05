@@ -9,7 +9,7 @@ function defineNotificationStructure(id, userName, avatarCode, notificationData)
         userName,
         avatarCode,
         date: new Date().toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }),
-        description: notificationData.description,
+        //description: notificationData.description,
         reference: notificationData.reference
     };
 }
@@ -69,7 +69,7 @@ async function addNotification(notificationData) {
     const stdnt = await getUserByIdLocal(notificationData.studentId);
 
 
-    notificationData.description = ' unlocked '+ notificationData.reference + " badge" ;
+    //notificationData.description = ' unlocked '+ notificationData.reference + " badge" ;
 
 
     // Define notification structure
