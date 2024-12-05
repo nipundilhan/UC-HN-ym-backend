@@ -1,7 +1,7 @@
 // controllers/module1-game3-QandA-controller.js
 const express = require('express');
 const router = express.Router();
-const { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus} = require('../services/module1-game3-QandA-service');
+const { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus , deleteGame3QandA} = require('../services/module1-game3-QandA-service');
 
 // Controller method to handle Game 3 QandA
 router.post('/', async (req, res) => {
@@ -74,6 +74,23 @@ router.put('/share', async (req, res) => {
         res.status(200).json(result);
     } catch (error) {
         console.error('Error updating shared status:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
+router.delete('/:studentId/:QandAId', async (req, res) => {
+    try {
+        const { studentId, QandAId } = req.params;
+
+        // Call service layer to delete the QandA
+        const result = await deleteGame3QandA(studentId, QandAId);
+
+        res.status(200).json({ 
+            message: 'QandA deleted successfully', 
+            result: result
+        });
+    } catch (error) {
+        console.error('Error deleting QandA:', error);
         res.status(400).json({ message: error.message });
     }
 });

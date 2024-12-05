@@ -259,6 +259,48 @@ async function updateSharedStatus(data) {
     };
 }
 
+async function deleteGame3QandA(studentId, QandAId) {
+    const db = await connectDB();
+    const collection = db.collection('studentTasks');
+
+    // Find the student task using studentId
+    const studentTask = await collection.findOne({ studentId: new ObjectId(studentId) });
+
+    if (!studentTask) {
+        throw new Error('Student task not found');
+    }
+
+    // Find the specific Q&A element
+    const game3 = studentTask.module1.game3;
+    const qAndAIndex = game3.QandA.findIndex(q => q._id.equals(new ObjectId(QandAId)));
+
+    if (qAndAIndex === -1) {
+        throw new Error('QandA not found');
+    }
+
+    // Remove the Q&A from the array
+    game3.QandA.splice(qAndAIndex, 1);
+
+    // Decrement gamePoints by 1, ensuring it doesn't go below 0
+    game3.gamePoints = Math.max(game3.gamePoints - 1, 0);
+
+    // Update the database
+    await collection.updateOne(
+        { studentId: new ObjectId(studentId) },
+        {
+            $set: {
+                'module1.game3.QandA': game3.QandA,
+                'module1.game3.gamePoints': game3.gamePoints
+            }
+        }
+    );
+
+    return {
+        message: 'Q&A deleted successfully',
+        result: game3,
+    };
+}
+
 async function getUserByIdLocal(id) {
     const db = await connectDB();
     const collection = db.collection('users');
@@ -276,4 +318,4 @@ async function getUserByIdLocal(id) {
 
 
 
-module.exports = { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus   };
+module.exports = { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus , deleteGame3QandA  };
