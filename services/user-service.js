@@ -88,6 +88,38 @@ async function handleUserSignup(userDetails) {
     return newUser;
 }
 
+
+
+
+
+async function handleInstructorSignup(userDetails) {
+    const { username, email } = userDetails;
+
+
+    // Validate if username or email already exists
+    const userExists = await validateUserDetails(username, email);
+    if (userExists) {
+        throw new Error('Username or email already exists');
+    }
+
+
+    // Create and save new user
+    const newUser = await createUserInstructor(userDetails);
+    return newUser;
+}
+
+async function createUserInstructor(userData) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    const user = defineUserStructure(null, userData , "INSTRUCTOR");
+
+    const result = await collection.insertOne(user);
+
+
+    return result;
+}
+
 /*
 async function getUserById(id) {
     const db = await connectDB();
@@ -120,4 +152,4 @@ async function getByUserName(userName) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent};
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup};

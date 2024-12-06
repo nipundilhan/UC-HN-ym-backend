@@ -1,12 +1,13 @@
 const { verifyToken } = require('../middlewares/auth-middleware');
 const express = require('express');
-const { handleUserSignup , updateStudent} = require('../services/user-service');
+const { handleUserSignup , updateStudent , handleInstructorSignup} = require('../services/user-service');
 
 const router = express.Router();
 
 router.get('/protected', verifyToken, protected);
 router.get('/get-username', verifyToken, getUsername);
 router.post('/signup', signup);
+router.post('/signup-instructor', signupInstructor);
 router.put('/update-student', verifyToken, updateStudentHandler); 
 
 
@@ -32,6 +33,20 @@ async function signup(req, res) {
 
         // Call service layer to handle user signup
         const newUser = await handleUserSignup(userDetails);
+
+        res.status(201).json(newUser);
+    } catch (error) {
+        console.error('Error signing up user:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function signupInstructor(req, res) {
+    try {
+        const userDetails = req.body;
+
+        // Call service layer to handle user signup
+        const newUser = await handleInstructorSignup(userDetails);
 
         res.status(201).json(newUser);
     } catch (error) {
