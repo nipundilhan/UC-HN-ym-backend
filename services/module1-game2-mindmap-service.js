@@ -149,6 +149,70 @@ async function updateSharedStatus(data) {
 }
 
 
+
+async function getSharedMindMapsForAdmin() {
+    const db = await connectDB();
+    const collection = db.collection('studentTasks');
+    const attachmentCollection = db.collection('attachments');
+
+    // Fetch all student tasks that contain shared QandAs
+    const sharedTasks = await collection.find({ "module1.game2.mindMaps.sharedStatus": { $in: ["SHARED", "HIDE"] } }).toArray();
+
+    let sharedQandAs = [];
+
+    // Loop through all student tasks using for...of
+    for (const studentTask of sharedTasks) {
+        const game2 = studentTask.module1.game2;
+
+        // Fetch the user data for each studentTask
+        const stdnt = await getUserByIdLocal(studentTask.studentId);
+
+        // Loop through the QandA array and filter shared QandAs
+        for (const qAndA of game2.mindMaps) {
+            if (qAndA.sharedStatus === "SHARED"  || qAndA.sharedStatus === "HIDE") {
+                const likesCount = qAndA.likes ? qAndA.likes.length : 0;
+
+
+
+                const attachmentDocs = await attachmentCollection.find({ _id: { $in: qAndA.attachments } }).toArray();
+                attachments = attachmentDocs;
+
+                sharedQandAs.push({
+                    _id: qAndA._id,
+                    ownerStudentId: studentTask.studentId,
+                    ownerStudentName: stdnt.username, 
+                    ownerAvatarCode : stdnt.avatarCode,
+                    title: qAndA.title,
+                    description: qAndA.description,
+                    date: qAndA.date,
+                    sharedStatus: qAndA.sharedStatus,
+                    likesCount,
+                    attachments : attachmentDocs,
+                    points: qAndA.points
+                });
+            }
+        }
+    }
+
+    // Sort the filtered shared QandAs by date
+    //sharedQandAs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    sharedQandAs.sort((a, b) => {
+        // Convert the date strings back to Date objects for comparison
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA; // Sort in descending order (most recent first)
+    });
+
+    // Now apply the skip and limit after filtering and sorting
+    const limitedQandAs = sharedQandAs.slice(0, 102); // Skip the first 0, limit to the next 1000
+
+    return {
+        mindMaps: limitedQandAs
+    };
+}
+
+
 async function getSharedMindMaps(studentId) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -345,7 +409,7 @@ async function handleRateMindMaps(studentData) {
     return await collection.findOne({ studentId: new ObjectId(ownerStudentId) });
 }
 
-module.exports = { addMindMap, getGame2Details ,updateSharedStatus , getSharedMindMaps , handleRateMindMaps};
+module.exports = { addMindMap, getGame2Details ,updateSharedStatus , getSharedMindMaps , handleRateMindMaps , getSharedMindMapsForAdmin};
 
 /*
 const connectDB = require('../config/db');

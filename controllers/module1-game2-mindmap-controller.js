@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMindMap , getGame2Details , updateSharedStatus , getSharedMindMaps , handleRateMindMaps } = require('../services/module1-game2-mindmap-service');
+const { addMindMap , getGame2Details , updateSharedStatus , getSharedMindMaps , handleRateMindMaps , getSharedMindMapsForAdmin } = require('../services/module1-game2-mindmap-service');
 const router = express.Router();
 const multer = require('multer');
 
@@ -25,6 +25,19 @@ router.post('/', upload.array('attachments'), async (req, res) => {
         res.status(201).json({ message: 'Mind map added successfully.' });
     } catch (error) {
         console.error('Error adding mind map:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
+router.get('/sharedMindMapsForAdmin', async (req, res) => {
+    try {
+
+        // Call the service to get all shared QandAs
+        const sharedQandAData = await getSharedMindMapsForAdmin();
+
+        res.status(200).json({ message: 'Shared QandA data retrieved successfully', data: sharedQandAData });
+    } catch (error) {
+        console.error('Error fetching shared QandA data:', error);
         res.status(400).json({ message: error.message });
     }
 });
