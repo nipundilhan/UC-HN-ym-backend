@@ -1,15 +1,15 @@
 const { verifyToken } = require('../middlewares/auth-middleware');
 const express = require('express');
-const { handleUserSignup , updateStudent , handleInstructorSignup} = require('../services/user-service');
+const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole} = require('../services/user-service');
 
 const router = express.Router();
 
 router.get('/protected', verifyToken, protected);
-router.get('/get-username', verifyToken, getUsername);
+router.get('/get-username', getUsername);
 router.post('/signup', signup);
 router.post('/signup-instructor', signupInstructor);
-router.put('/update-student', verifyToken, updateStudentHandler); 
-
+router.put('/update-student',  updateStudentHandler); 
+router.get('/find-by-role/:role', getUsersByRoleHandler);
 
 // Controller method to handle protected route
 function protected(req, res) {
@@ -74,5 +74,26 @@ async function updateStudentHandler(req, res) {
     }
 }
 
+async function getUsersByRoleHandler(req, res) {
+    try {
+        const { role } = req.params; // Extract role from the path parameter
+
+        if (!role) {
+            return res.status(400).json({ message: "Role is required." });
+        }
+
+        // Fetch users and total count from the service
+        const { users, totalCount } = await getUsersByRole(role);
+
+        res.status(200).json({
+            message: "Users fetched successfully.",
+            totalCount,
+            users
+        });
+    } catch (error) {
+        console.error('Error fetching users by role:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
 
 module.exports = router;    

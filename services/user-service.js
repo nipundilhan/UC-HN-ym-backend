@@ -112,7 +112,7 @@ async function createUserInstructor(userData) {
     const db = await connectDB();
     const collection = db.collection('users');
 
-    const user = defineUserStructure(null, userData , "INSTRUCTOR");
+    const user = defineUserStructure(null, userData , "ADMIN");
 
     const result = await collection.insertOne(user);
 
@@ -152,4 +152,22 @@ async function getByUserName(userName) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup};
+
+async function getUsersByRole(role) {
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const totalCount = await collection.countDocuments({ role });
+        const users = await collection
+            .find({ role })
+            .limit(102)
+            .toArray();
+
+        return { users, totalCount };
+    } catch (error) {
+        throw new Error(`Error fetching users by role: ${error.message}`);
+    }
+}
+
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup , getUsersByRole};
