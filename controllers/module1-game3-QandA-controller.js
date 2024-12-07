@@ -1,7 +1,7 @@
 // controllers/module1-game3-QandA-controller.js
 const express = require('express');
 const router = express.Router();
-const { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus , deleteGame3QandA} = require('../services/module1-game3-QandA-service');
+const { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus , deleteGame3QandA , getSharedQandAsForAdmin} = require('../services/module1-game3-QandA-service');
 
 // Controller method to handle Game 3 QandA
 router.post('/', async (req, res) => {
@@ -33,6 +33,20 @@ router.post('/rate', async (req, res) => {
 });
 
 
+//gives error if this mentioned after fetch data by student id
+router.get('/sharedQandAForAdmin', async (req, res) => {
+    try {
+
+        // Call the service to get all shared QandAs
+        const sharedQandAData = await getSharedQandAsForAdmin();
+
+        res.status(200).json({ message: 'Shared QandA data retrieved successfully', data: sharedQandAData });
+    } catch (error) {
+        console.error('Error fetching shared QandA data:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
 
 // Route to fetch Game 3 data for a specific student
 router.get('/:studentId', async (req, res) => {
@@ -48,6 +62,8 @@ router.get('/:studentId', async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+
+
 
 
 router.get('/sharedQandA/:studentId', async (req, res) => {

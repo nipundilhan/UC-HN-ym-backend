@@ -186,7 +186,6 @@ async function getSharedQandAs(studentId) {
 
                 sharedQandAs.push({
                     _id: qAndA._id,
-                    // ownerStudentId: studentTask.studentId,
                     ownerStudentName: stdnt.username, 
                     ownerAvatarCode : stdnt.avatarCode,
                     type: qAndA.type,
@@ -214,6 +213,63 @@ async function getSharedQandAs(studentId) {
     });
 
     // Now apply the skip and limit after filtering and sorting
+    const limitedQandAs = sharedQandAs.slice(0, 102); // Skip the first 0, limit to the next 1000
+
+    return {
+        QandA: limitedQandAs
+    };
+}
+
+async function getSharedQandAsForAdmin() {
+    const db = await connectDB();
+    const collection = db.collection('studentTasks');
+
+    // Fetch all student tasks that contain sharedStatus as SHARED or HIDE
+    const sharedTasks = await collection.find({ "module1.game3.QandA.sharedStatus": { $in: ["SHARED", "HIDE"] } }).toArray();
+
+    let sharedQandAs = [];
+
+    // Loop through all student tasks using for...of
+    for (const studentTask of sharedTasks) {
+        const game3 = studentTask.module1.game3;
+
+        // Fetch the user data for each studentTask
+        const stdnt = await getUserByIdLocal(studentTask.studentId);
+
+        // Loop through the QandA array and filter shared QandAs
+        for (const qAndA of game3.QandA) {
+            if (qAndA.sharedStatus === "SHARED" || qAndA.sharedStatus === "HIDE") {
+                const likesCount = qAndA.likes ? qAndA.likes.length : 0;
+
+                // Determine the 'liked' field based on the input studentId
+
+
+                sharedQandAs.push({
+                    _id: qAndA._id,
+                    ownerStudentId: studentTask.studentId,
+                    ownerStudentName: stdnt.username, 
+                    ownerAvatarCode: stdnt.avatarCode,
+                    type: qAndA.type,
+                    lessonTitle: qAndA.lessonTitle,
+                    question: qAndA.question,
+                    answer: qAndA.answer,
+                    date: qAndA.date,
+                    sharedStatus: qAndA.sharedStatus,
+                    likesCount,
+                    points: qAndA.points
+                });
+            }
+        }
+    }
+
+    // Sort the filtered shared QandAs by date
+    sharedQandAs.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA; // Sort in descending order (most recent first)
+    });
+
+    // Apply skip and limit after filtering and sorting
     const limitedQandAs = sharedQandAs.slice(0, 102); // Skip the first 0, limit to the next 1000
 
     return {
@@ -318,4 +374,4 @@ async function getUserByIdLocal(id) {
 
 
 
-module.exports = { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus , deleteGame3QandA  };
+module.exports = { handleGame3QandA , handleRateQandA , getGame3QandAData , getSharedQandAs , updateSharedStatus , deleteGame3QandA , getSharedQandAsForAdmin };
