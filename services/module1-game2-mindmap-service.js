@@ -112,6 +112,45 @@ async function getGame2Details(studentId) {
     return game2Details;
 }
 
+
+async function deleteMindMap(studentId, mindMapId) {
+    const db = await connectDB();
+    const studentCollection = db.collection('studentTasks');
+    const attachmentCollection = db.collection('attachments');
+
+    // Find the student task
+    const studentTask = await studentCollection.findOne({ studentId: new ObjectId(studentId) });
+    if (!studentTask) {
+        throw new Error('Student task not found.');
+    }
+
+    // Find the specific mind map in module1.game2
+    const mindMap = studentTask.module1?.game2?.mindMaps?.find(map => map._id.equals(new ObjectId(mindMapId)));
+    if (!mindMap) {
+        throw new Error('Mind map not found.');
+    }
+
+    // Delete attachments from the attachments collection
+    if (mindMap.attachments && mindMap.attachments.length > 0) {
+        await attachmentCollection.deleteMany({ _id: { $in: mindMap.attachments } });
+    }
+
+    // Remove the mind map and decrement the game points
+    const updateResult = await studentCollection.updateOne(
+        { studentId: new ObjectId(studentId) },
+        {
+            $pull: { "module1.game2.mindMaps": { _id: new ObjectId(mindMapId) } },
+            $inc: { "module1.game2.gamePoints": -1 }
+        }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+        throw new Error('Failed to delete the mind map.');
+    }
+
+    return { message: 'Mind map deleted successfully.' };
+}
+
 async function updateSharedStatus(data) {
     const { ownerStudentId, mindMapId, sharedStatus } = data;
 
@@ -300,64 +339,6 @@ async function getUserByIdLocal(id) {
 }
 
 
-async function handleGame3QandA(studentData) {
-    const db = await connectDB();
-    const collection = db.collection('studentTasks');
-
-    const { studentId, QandAId, type, lessonTitle, question, answer } = studentData;
-
-    // Check if the student record exists
-    let studentTask = await collection.findOne({ studentId: new ObjectId(studentId) });
-
-    const newQandA = {
-        _id: new ObjectId(),
-        type,
-        lessonTitle,
-        question,
-        answer,
-        date: formatDate(new Date()), 
-        sharedStatus: "NOT_SHARED",
-        likes: [],
-        points: 1
-    };
-
-    if (!studentTask) {
-        // No student task exists, create new one with empty QandA array
-        studentTask = defineStudentTaskStructure(studentData);
-
-        studentTask.module1.game3.QandA.push(newQandA);
-        studentTask.module1.game3.gamePoints = 1;
-
-        // Insert new student task record
-        await collection.insertOne(studentTask);
-    } else {
-        // Student task exists, update or insert QandA
-        const game3 = studentTask.module1.game3;
-
-        if (!QandAId) {
-            // No QandAId, so create new QandA
-
-            game3.QandA.push(newQandA);
-            game3.gamePoints += 1;
-        } else {
-            // QandAId exists, so update existing QandA
-            const qAndAIndex = game3.QandA.findIndex(q => q._id.equals(QandAId));
-            if (qAndAIndex > -1) {
-                game3.QandA[qAndAIndex].type = type;
-                game3.QandA[qAndAIndex].lessonTitle = lessonTitle;
-                game3.QandA[qAndAIndex].question = question;
-                game3.QandA[qAndAIndex].answer = answer;
-            }
-        }
-
-        // Update the student task record
-        await collection.updateOne({ studentId: new ObjectId(studentId) }, { $set: { module1: studentTask.module1 } });
-    }
-
-    return studentTask;
-}
-
-
 async function handleRateMindMaps(studentData) {
     const db = await connectDB();
     const collection = db.collection('studentTasks');
@@ -409,113 +390,5 @@ async function handleRateMindMaps(studentData) {
     return await collection.findOne({ studentId: new ObjectId(ownerStudentId) });
 }
 
-module.exports = { addMindMap, getGame2Details ,updateSharedStatus , getSharedMindMaps , handleRateMindMaps , getSharedMindMapsForAdmin};
+module.exports = { addMindMap, getGame2Details ,updateSharedStatus , getSharedMindMaps , handleRateMindMaps , getSharedMindMapsForAdmin , deleteMindMap};
 
-/*
-const connectDB = require('../config/db');
-const { ObjectId } = require('mongodb');
-const { defineStudentTaskStructure } = require('../services/modules-service');
-const {  formatDate } = require('../services/modules-service');
-
-
-function defineStudentTaskStructure(studentData) {
-    
-    return {
-        _id :  new ObjectId(),
-        studentName: studentData.studentName || "",
-        studentId: new ObjectId(studentData.studentId),
-        moods: [],
-        module1: {
-            moduleCode: "MOD1",
-            game1: {
-                gameCode: "GM1",
-                gamePoints: 0,
-                tasks: [] // Tasks array will contain objects with the following structure:
-
-            },            
-            game2: {
-                gameCode: "GM2",
-                gamePoints: 1, // Initialize to 1 for the new entry
-                mindMaps: []
-            }
-        }
-    };
-}
-
-
-async function addMindMap(studentId, mindMapData) {
-    const db = await connectDB();
-    const collection = db.collection('studentTasks');
-
-    // Check if a record exists for this student
-    let studentRecord = await collection.findOne({ studentId: new ObjectId(studentId) });
-
-    // If no record exists, initialize a new record
-    if (!studentRecord) {
-        const newStudentTask = defineStudentTaskStructure({ studentId });
-        studentRecord = await collection.insertOne(newStudentTask);
-    }
-
-    // Prepare the mind map object
-    const mindMap = {
-        _id: new ObjectId(),
-        title: mindMapData.title,
-        description: mindMapData.description,
-        date: formatDate(new Date()), 
-        attachments: mindMapData.attachments.map(file => ({
-            filename: file.originalname, // Save original filename
-            contentType: file.mimetype, // Save content type
-            data: file.buffer // Save the file as binary data
-        })),
-        sharedStatus: "NOT_SHARED",
-        likes: [],
-        points: 1 // Points for the new mind map
-    };
-
-    // Check if mindMapId is provided
-    if (mindMapData.mindMapId) {
-        // Update the existing mind map
-        const updateResult = await collection.updateOne(
-            { studentId: new ObjectId(studentId), "module1.game2.mindMaps._id": new ObjectId(mindMapData.mindMapId) },
-            { $set: { "module1.game2.mindMaps.$": mindMap } } // Update mind map details
-        );
-        return updateResult;
-    } else {
-        // Push the new mind map into the existing array and increment gamePoints
-        await collection.updateOne(
-            { studentId: new ObjectId(studentId) },
-            { 
-                $push: { "module1.game2.mindMaps": mindMap },
-                $inc: { "module1.game2.gamePoints": 1 } // Increment game points
-            }
-        );
-    }
-}
-
-
-async function getGame2Details(studentId) {
-    const db = await connectDB();
-    const collection = db.collection('studentTasks');
-
-    // Find the student record by studentId
-    const studentRecord = await collection.findOne({ studentId: new ObjectId(studentId) }, { projection: { "module1.game2": 1 } });
-
-    if (!studentRecord) {
-        return null; // Student not found
-    }
-
-    const game2Details = studentRecord.module1.game2;
-
-    // Add a check for the mindMaps array to return attachments from the first object
-    // if (game2Details && game2Details.mindMaps.length > 0) {
-    //     const firstMindMap = game2Details.mindMaps[0];
-    //     game2Details.attachments = firstMindMap.attachments; // Add attachments to the game2Details
-    // }
-
-    return game2Details;
-}
-
-
-module.exports = { addMindMap , getGame2Details};
-
-*/

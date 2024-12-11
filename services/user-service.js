@@ -2,6 +2,22 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 const { defineStudentTaskStructure  } = require('../services/modules-service');
+const {  ENCRPYT_SECRET } = require('../utils/jwt-utils');
+const crypto = require('crypto');
+
+
+// AES-256-CTR Configuration
+const algorithm = "aes-256-ctr";
+const encryptionKey = crypto.createHash('sha256').update(ENCRPYT_SECRET).digest(); // 32-byte key
+
+function encrypt(text) {
+    const iv = Buffer.alloc(16, 0); // Initialization vector (IV)
+    const cipher = crypto.createCipheriv(algorithm, encryptionKey, iv);
+    const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+    return encrypted.toString('hex');
+}
+
+
 
 function defineUserStructure(id, userData, userRole) {
     return {
@@ -11,9 +27,10 @@ function defineUserStructure(id, userData, userRole) {
         gender: userData.gender,
         dob: userData.dob,
         email: userData.email,
-        password: userData.password,
+        password: encrypt(userData.password),
         avatarCode :userData.avatarCode,
         signupDate: new Date().toISOString().split('T')[0], // Format: YYYY-MM-DD
+        timeTracking: [],
     };
 }
 
@@ -170,4 +187,142 @@ async function getUsersByRole(role) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup , getUsersByRole};
+function formatDate(date) {
+    // Extract the date part (yyyy-mm-dd)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Format the time part (hh:mm AM/PM)
+    const options = {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    };
+    const time = new Intl.DateTimeFormat('en-US', options).format(date);
+
+    // Return the full formatted date string in "yyyy-mm-dd hh:mm AM/PM" format
+    return `${year}-${month}-${day} ${time}`;
+}
+
+
+async function updateTimeTracking(userId, action) {
+    if (!userId) {
+        throw new Error("User ID is required.");
+    }
+
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    // Get current date and time
+    const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const currentTime = new Date();
+    const currentFormatTime = formatDate(new Date());
+
+    const filter = { _id: new ObjectId(userId) };
+
+    // Check if the current date exists in the timeTracking array
+    const user = await collection.findOne(filter);
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    const existingRecord = user.timeTracking?.find(record => record.date === currentDate);
+
+    let update, options = {};
+    if (existingRecord) {
+        // Update the existing record based on the action type
+        if (action === "LOGIN") {
+            update = {
+                $set: {
+                    "timeTracking.$[elem].lastActionTime": currentTime,
+                    "timeTracking.$[elem].lastActionFormatTime": currentFormatTime
+                },
+                $inc: {
+                    "timeTracking.$[elem].times": 1
+                }
+            };
+        } else {
+            // Calculate duration difference in seconds
+            const lastActionTime = new Date(existingRecord.lastActionTime);
+            const duration = Math.floor((currentTime - lastActionTime) / 1000);
+
+            update = {
+                $set: {
+                    "timeTracking.$[elem].lastActionTime": currentTime,
+                    "timeTracking.$[elem].lastActionFormatTime": currentFormatTime
+                },
+                $inc: {
+                    "timeTracking.$[elem].duration": duration
+                }
+            };
+        }
+
+        options.arrayFilters = [{ "elem.date": currentDate }];
+    } else {
+        // Add a new record to the array
+        const newRecord = {
+            date: currentDate,
+            times: 1,
+            lastActionTime: currentTime,
+            lastActionFormatTime: currentFormatTime,
+            duration: 0
+        };
+
+        update = {
+            $push: {
+                timeTracking: newRecord
+            }
+        };
+    }
+
+    const result = await collection.updateOne(filter, update, options);
+
+    if (result.modifiedCount === 0) {
+        throw new Error("Failed to update time tracking.");
+    }
+
+    return { message: "Time tracking updated successfully." };
+}
+
+
+async function deleteUser(userId) {
+    if (!userId) {
+        throw new Error("User ID is required.");
+    }
+
+    const db = await connectDB();
+    const usersCollection = db.collection('users');
+    const studentTasksCollection = db.collection('studentTasks');
+
+    const filter = { _id: new ObjectId(userId) };
+
+    try {
+        // Delete the user
+        const deleteUserResult = await usersCollection.deleteOne(filter);
+
+        if (deleteUserResult.deletedCount === 0) {
+            throw new Error("User not found or already deleted.");
+        }
+
+        //console.log("User deleted successfully.");
+
+        // Attempt to delete associated student tasks if the user is a student
+        const deleteStudentTasksResult = await studentTasksCollection.deleteOne({
+            studentId: new ObjectId(userId),
+        });
+
+        if (deleteStudentTasksResult.deletedCount > 0) {
+            //console.log("Associated student tasks deleted successfully.");
+        } else {
+            console.log("No associated student tasks found for this user.");
+        }
+
+        return { message: "User and associated student tasks processed successfully." };
+    } catch (error) {
+        throw new Error(`Error deleting user: ${error.message}`);
+    }
+}
+
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser};

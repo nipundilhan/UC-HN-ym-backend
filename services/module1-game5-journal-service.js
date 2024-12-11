@@ -1,11 +1,12 @@
 const connectDB = require('../config/db');
 const { ObjectId } = require('mongodb');
 const { defineStudentTaskStructure , formatDate } = require('../services/modules-service');
+const {  ENCRPYT_SECRET } = require('../utils/jwt-utils');
 const crypto = require('crypto');
 
 // AES-256-CTR Configuration
 const algorithm = "aes-256-ctr";
-const encryptionKey = crypto.createHash('sha256').update("your_secret_key").digest(); // 32-byte key
+const encryptionKey = crypto.createHash('sha256').update(ENCRPYT_SECRET).digest(); // 32-byte key
 
 function encrypt(text) {
     const iv = Buffer.alloc(16, 0); // Initialization vector (IV)

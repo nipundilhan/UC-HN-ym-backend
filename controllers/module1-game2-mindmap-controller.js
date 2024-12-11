@@ -1,5 +1,5 @@
 const express = require('express');
-const { addMindMap , getGame2Details , updateSharedStatus , getSharedMindMaps , handleRateMindMaps , getSharedMindMapsForAdmin } = require('../services/module1-game2-mindmap-service');
+const { addMindMap , getGame2Details , updateSharedStatus , getSharedMindMaps , handleRateMindMaps , getSharedMindMapsForAdmin , deleteMindMap } = require('../services/module1-game2-mindmap-service');
 const router = express.Router();
 const multer = require('multer');
 
@@ -102,6 +102,20 @@ router.post('/rate', async (req, res) => {
         res.status(200).json({ message: 'Rating processed successfully'});
     } catch (error) {
         console.error('Error processing rating:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+
+router.delete('/:studentId/:mindMapId', async (req, res) => {
+    try {
+        const { studentId, mindMapId } = req.params;
+
+        // Call the service to delete the mind map
+        const result = await deleteMindMap(studentId, mindMapId);
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error deleting mind map:', error);
         res.status(400).json({ message: error.message });
     }
 });

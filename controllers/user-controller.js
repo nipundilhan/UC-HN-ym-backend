@@ -1,6 +1,6 @@
 const { verifyToken } = require('../middlewares/auth-middleware');
 const express = require('express');
-const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole} = require('../services/user-service');
+const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser} = require('../services/user-service');
 
 const router = express.Router();
 
@@ -10,6 +10,9 @@ router.post('/signup', signup);
 router.post('/signup-instructor', signupInstructor);
 router.put('/update-student',  updateStudentHandler); 
 router.get('/find-by-role/:role', getUsersByRoleHandler);
+router.get('/update-time-tracking/:userId', updateTimeTrackingHandler);
+router.delete('/delete-user/:userId', deleteUserHandler);
+
 
 // Controller method to handle protected route
 function protected(req, res) {
@@ -93,6 +96,42 @@ async function getUsersByRoleHandler(req, res) {
     } catch (error) {
         console.error('Error fetching users by role:', error);
         res.status(500).json({ message: error.message });
+    }
+}
+
+
+async function updateTimeTrackingHandler(req, res) {
+    try {
+        const { userId } = req.params; // Extract `userId` from the path parameter
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required." });
+        }
+
+        // Call service layer to update time tracking
+        const result = await updateTimeTracking(userId , "NORMAL");
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error updating time tracking:", error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function deleteUserHandler(req, res) {
+    try {
+        const { userId } = req.params;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required." });
+        }
+
+        const result = await deleteUser(userId);
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(400).json({ message: error.message });
     }
 }
 
