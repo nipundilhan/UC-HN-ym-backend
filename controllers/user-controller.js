@@ -1,6 +1,6 @@
 const { verifyToken } = require('../middlewares/auth-middleware');
 const express = require('express');
-const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser} = require('../services/user-service');
+const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser , updatePassword} = require('../services/user-service');
 
 const router = express.Router();
 
@@ -12,6 +12,7 @@ router.put('/update-student',  updateStudentHandler);
 router.get('/find-by-role/:role', getUsersByRoleHandler);
 router.get('/update-time-tracking/:userId', updateTimeTrackingHandler);
 router.delete('/delete-user/:userId', deleteUserHandler);
+router.put('/update-password', updatePasswordHandler);
 
 
 // Controller method to handle protected route
@@ -131,6 +132,24 @@ async function deleteUserHandler(req, res) {
         res.status(200).json(result);
     } catch (error) {
         console.error("Error deleting user:", error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function updatePasswordHandler(req, res) {
+    try {
+        const { userId, oldPassword, newPassword } = req.body;
+
+        if (!userId || !oldPassword || !newPassword) {
+            return res.status(400).json({ message: "All fields (userId, oldPassword, newPassword) are required." });
+        }
+
+        // Call the service layer to update the password
+        const result = await updatePassword(userId, oldPassword, newPassword);
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error updating password:", error);
         res.status(400).json({ message: error.message });
     }
 }

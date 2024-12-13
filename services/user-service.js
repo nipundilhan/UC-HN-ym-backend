@@ -26,6 +26,7 @@ function defineUserStructure(id, userData, userRole) {
         role: userRole,
         gender: userData.gender,
         dob: userData.dob,
+        type: userData.type,
         email: userData.email,
         password: encrypt(userData.password),
         avatarCode :userData.avatarCode,
@@ -72,8 +73,8 @@ async function updateStudent(userData) {
     const filter = { _id: new ObjectId(userData._id) };
     const update = {
         $set: {
-            gender: userData.gender,
-            dob: userData.dob,
+            //gender: userData.gender,
+            //dob: userData.dob,
             avatarCode: userData.avatarCode,
         },
     };
@@ -325,4 +326,41 @@ async function deleteUser(userId) {
     }
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser};
+
+async function updatePassword(userId, oldPassword, newPassword) {
+    if (!userId || !oldPassword || !newPassword) {
+        throw new Error("All fields (userId, oldPassword, newPassword) are required.");
+    }
+
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    const user = await collection.findOne({ _id: new ObjectId(userId) });
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    // Validate the old password
+    const encryptedOldPassword = encrypt(oldPassword);
+    if (user.password !== encryptedOldPassword) {
+        throw new Error("Incorrect old password.");
+    }
+
+    // Encrypt the new password
+    const encryptedNewPassword = encrypt(newPassword);
+
+    // Update the password
+    const result = await collection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $set: { password: encryptedNewPassword } }
+    );
+
+    if (result.modifiedCount === 0) {
+        throw new Error("Failed to update password.");
+    }
+
+    return { message: "Password updated successfully." };
+}
+
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser , updatePassword};
