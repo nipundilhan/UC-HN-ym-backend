@@ -181,6 +181,8 @@ async function findStudentGameMarks(studentId) {
     const response = {
         taskId : result._id,
         avatarCode : stdnt.avatarCode,
+        dob : stdnt.dob,
+        gender : stdnt.gender,
         examDate : moduleDetails.examDate,
         totalMarks: calculateTotalMarks(result) ,
         //game1CompletedTasks: result.module1.game1.tasks.length,
