@@ -14,6 +14,7 @@ async function addBreathingPractice(studentData) {
         _id: new ObjectId(),
         date: todayDate,
         techniqueCode: studentData.techniqueCode,
+        type: studentData.type,
         cycles: studentData.cycles,
         time: studentData.time,
         points: 1

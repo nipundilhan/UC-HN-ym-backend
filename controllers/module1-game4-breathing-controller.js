@@ -6,6 +6,7 @@ const router = express.Router();
 // Route for adding a new breathing practice entry
 router.post('/', addBreathingPractice);
 router.get('/findByStudent/:studentId', getBreathingPracticesByStudentId);
+router.delete('/delete/:studentId/:practiceId', deleteBreathingPractice); // Delete route
 
 async function addBreathingPractice(req, res) {
     try {
