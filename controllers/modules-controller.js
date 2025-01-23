@@ -1,10 +1,11 @@
 const express = require('express');
-const { getGameDetails,findStudentGameMarks , shareBadge  } = require('../services/modules-service');
+const { getGameDetails,findStudentGameMarks , findAllStudentsGameMarks ,shareBadge  } = require('../services/modules-service');
 
 const router = express.Router();
 
 router.get('/game-details', getGameDetailsHandler);
 router.get('/findPointsByStudent/:id', findgamePointsByStudentID);
+//router.get('/findStudentMarks', findAllStudentsMarks);
 router.post('/shareBadge', shareStudentadge);
 
 // Controller method to handle the GET request for game details
@@ -31,6 +32,21 @@ async function findgamePointsByStudentID(req, res) {
     try {
         const studentId = req.params.id;
         const gamePointDetails = await findStudentGameMarks(studentId);
+        if (gamePointDetails) {
+            res.status(200).json(gamePointDetails);
+        } else {
+            res.status(404).json({ message: 'student data not found' });
+        }
+    } catch (error) {
+        console.error('Error updating country:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+async function findAllStudentsMarks(req, res) {
+    try {
+        const studentId = req.params.id;
+        const gamePointDetails = await findAllStudentsGameMarks(studentId);
         if (gamePointDetails) {
             res.status(200).json(gamePointDetails);
         } else {
