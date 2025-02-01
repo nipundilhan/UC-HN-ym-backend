@@ -46,9 +46,9 @@ async function handleAddTutorial(tutorialData) {
                         "module1.game1.tasks.$.description": taskData.description,
                         "module1.game1.tasks.$.date": taskData.date,
                         "module1.game1.tasks.$.status": taskData.status,
-                        "module1.game1.tasks.$.points": taskPoints
+                        "module1.game1.tasks.$.points": existingTask.status === "Completed" ? 1 : taskPoints 
                     },
-                    $inc: { "module1.game1.gamePoints": taskPoints }
+                    $inc: { "module1.game1.gamePoints": existingTask.status === "Completed" ? 0 : taskPoints }
                    //,$set: { "module1.game1.badge1Achieved": badge1Achieved , "module1.game1.badge2Achieved": badge2Achieved }
                 }
             );
