@@ -68,7 +68,7 @@ async function shareStudentadge(req, res) {
         if (result.modifiedCount > 0) {
             res.status(200).json({ message: 'Badge shared successfully' });
         } else {
-            res.status(404).json({ message: 'Student task not found or badge already shared' });
+            res.status(200).json({ message: ' badge might have already shared' });
         }
     } catch (error) {
         console.error('Error sharing badge:', error);

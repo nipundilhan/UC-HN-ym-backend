@@ -514,8 +514,10 @@ async function shareBadge(data) {
         { $set: { [badgePath]: "YES" } }
     );
 
- 
-
+    if (result.modifiedCount > 0) {
+        addNotification(data);
+    }
+    return result;
     /*
 
     let result = null;
@@ -540,12 +542,11 @@ async function shareBadge(data) {
     }
         */
 
-    addNotification(data);
 
     // Update the badge1Shared field for game1 in module1
     
 
-    return result;
+    
 }
 
 
