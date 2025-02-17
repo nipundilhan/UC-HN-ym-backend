@@ -490,7 +490,7 @@ function generateCompleteMoods(moods, signupDate) {
     });
 
     // Order the moods with the latest first
-    return completeMoods;
+    return completeMoods.sort((a, b) => new Date(b.date) - new Date(a.date));;
 }
 
 async function shareBadge(data) {
