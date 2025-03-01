@@ -1,6 +1,7 @@
 const { verifyToken } = require('../middlewares/auth-middleware');
 const express = require('express');
-const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser , updatePassword} = require('../services/user-service');
+const { handleUserSignup , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking ,
+    resetPasswordOTPEmail, deleteUser , updatePassword , passwordResetMethod } = require('../services/user-service');
 
 const router = express.Router();
 
@@ -13,6 +14,8 @@ router.get('/find-by-role/:role', getUsersByRoleHandler);
 router.get('/update-time-tracking/:userId', updateTimeTrackingHandler);
 router.delete('/delete-user/:userId', deleteUserHandler);
 router.put('/update-password', updatePasswordHandler);
+router.get('/reset-password-email/:email', resetPasswordByEmail);
+router.put('/password-reset', passwordResetHandler);
 
 
 // Controller method to handle protected route
@@ -146,6 +149,46 @@ async function updatePasswordHandler(req, res) {
 
         // Call the service layer to update the password
         const result = await updatePassword(userId, oldPassword, newPassword);
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+
+async function resetPasswordByEmail(req, res) {
+    try {
+        const { email } = req.params; // Extract role from the path parameter
+
+        if (!email) {
+            return res.status(400).json({ message: "Role is required." });
+        }
+
+        // Fetch users and total count from the service
+        const result = await resetPasswordOTPEmail(email);
+
+        res.status(200).json({
+            message: "password reset email sent.",
+        });
+    } catch (error) {
+        console.error('Error password reset email sent:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+async function passwordResetHandler(req, res) {
+    try {
+        const { username, otp, newPassword } = req.body;
+
+        if (!username || !otp || !newPassword) {
+            return res.status(400).json({ message: "All fields (userName, otp, newPassword) are required." });
+        }
+
+        // Call the service layer to update the password
+        const result = await passwordResetMethod(username, otp, newPassword );
 
         res.status(200).json(result);
     } catch (error) {

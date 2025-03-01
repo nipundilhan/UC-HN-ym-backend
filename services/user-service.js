@@ -4,6 +4,7 @@ const { ObjectId } = require('mongodb');
 const { defineStudentTaskStructure  } = require('../services/modules-service');
 const {  ENCRPYT_SECRET } = require('../utils/jwt-utils');
 const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 
 // AES-256-CTR Configuration
@@ -363,4 +364,115 @@ async function updatePassword(userId, oldPassword, newPassword) {
     return { message: "Password updated successfully." };
 }
 
-module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser , updatePassword};
+
+async function resetPasswordOTPEmail(email) {
+
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    try {
+        const user = await collection.findOne({ email: email });
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const otp =Math.floor(1000 + Math.random() * 9000).toString();;
+
+        const result = await collection.updateOne(
+            { _id: new ObjectId(user._id) },
+            { $set: { otp: otp } }
+        );
+
+        
+            const senderEmail = 'nipun.dilhan1@gmail.com';
+            const transporter = nodemailer.createTransport({
+            service: 'gmail', // You can use another SMTP service
+            auth: {
+                user: senderEmail, // Your email address
+                pass: 'fdbdrmztwflqghbt' // Your email password or App Password (for Gmail)
+            }
+            });
+
+        // Prepare the header image URL
+
+
+        // Prepare the email content
+        const emailContent = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.5;width: 96%;">
+
+                <p>Dear ${user.username},</p>
+                <p>Here Are the details for you to reset your password.</p>
+                <p></p>
+                <p>Your UserName: ${user.username}</p>
+                <p>OTP: ${otp}</p>
+                <p> </p>
+
+ 
+                <p>Regards,</p>
+                <p>Young Mind Admin Team</p>
+            </div>
+        `;
+
+        // Define email options
+        const mailOptions = {
+            from: senderEmail,
+            to: email, // Customer's email address
+            subject: `reset password`,
+            html: emailContent
+        };
+
+        // Send the email
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log('Email sent successfully.');
+        } catch (error) {
+            console.error('Error sending email:', error);
+        }
+    } catch (error) {
+        throw new Error(`Error sending user by email: ${error.message}`);
+    }
+
+
+
+
+    
+}
+
+async function passwordResetMethod(userName, otp, newPassword ) {
+    if (!userName || !otp || !newPassword) {
+        throw new Error("All fields (userName, otp, newPassword) are required.");
+    }
+
+    const db = await connectDB();
+    const collection = db.collection('users');
+
+    const user = await collection.findOne({ username: userName});
+
+    if (!user) {
+        throw new Error("User not found.");
+    }
+
+    // Validate the old password
+    
+    if (user.otp !== otp) {
+        throw new Error("Incorrect otp.");
+    }
+
+    // Encrypt the new password
+    const encryptedNewPassword = encrypt(newPassword);
+    const resetOtp =Math.floor(1000 + Math.random() * 9000).toString();;
+    // Update the password
+    const result = await collection.updateOne(
+        { _id: new ObjectId(user._id) },
+        { $set: { password: encryptedNewPassword , otp: resetOtp} }
+    );
+
+    if (result.modifiedCount === 0) {
+        throw new Error("Failed to update password.");
+    }
+
+    return { message: "Password reset successfully." };
+}
+
+module.exports = { validateUserDetails, createUserStudent, handleUserSignup   , getByUserName , 
+    resetPasswordOTPEmail, updateStudent , handleInstructorSignup , getUsersByRole , updateTimeTracking , deleteUser , updatePassword , passwordResetMethod};
