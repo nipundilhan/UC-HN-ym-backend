@@ -163,14 +163,14 @@ async function resetPasswordByEmail(req, res) {
         const { email } = req.params; // Extract role from the path parameter
 
         if (!email) {
-            return res.status(400).json({ message: "Role is required." });
+            return res.status(400).json({ message: "email is required." });
         }
 
         // Fetch users and total count from the service
         const result = await resetPasswordOTPEmail(email);
 
         res.status(200).json({
-            message: "password reset email sent.",
+            message: "OTP email sent.",
         });
     } catch (error) {
         console.error('Error password reset email sent:', error);

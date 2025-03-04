@@ -373,7 +373,7 @@ async function resetPasswordOTPEmail(email) {
     try {
         const user = await collection.findOne({ email: email });
         if (!user) {
-            throw new Error('User not found');
+            throw new Error('No user attached to this email');
         }
 
         const otp =Math.floor(1000 + Math.random() * 9000).toString();;
@@ -384,12 +384,12 @@ async function resetPasswordOTPEmail(email) {
         );
 
         
-            const senderEmail = 'nipun.dilhan1@gmail.com';
+            const senderEmail = 'youngmind.uc@gmail.com';
             const transporter = nodemailer.createTransport({
             service: 'gmail', // You can use another SMTP service
             auth: {
                 user: senderEmail, // Your email address
-                pass: 'fdbdrmztwflqghbt' // Your email password or App Password (for Gmail)
+                pass: 'forelpselgoumddd' // Your email password or App Password (for Gmail)
             }
             });
 
@@ -401,17 +401,18 @@ async function resetPasswordOTPEmail(email) {
             <div style="font-family: Arial, sans-serif; line-height: 1.5;width: 96%;">
 
                 <p>Dear ${user.username},</p>
-                <p>Here Are the details for you to reset your password.</p>
+                <p>Here are the details for you to reset your password.</p>
                 <p></p>
-                <p>Your UserName: ${user.username}</p>
-                <p>OTP: ${otp}</p>
-                <p> </p>
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;    Your username: <strong> ${user.username}  </strong> <br>
+                   &nbsp;&nbsp;&nbsp;&nbsp;    OTP          : <strong> ${otp} <strong>
+                </p>
+                
 
  
-                <p>Regards,</p>
-                <p>Young Mind Admin Team</p>
-            </div>
-        `;
+                <p>Regards, <br>
+                 Young Mind Admin Team
+                </p>
+            </div>`;
 
         // Define email options
         const mailOptions = {
@@ -429,7 +430,7 @@ async function resetPasswordOTPEmail(email) {
             console.error('Error sending email:', error);
         }
     } catch (error) {
-        throw new Error(`Error sending user by email: ${error.message}`);
+        throw new Error(`Error in sending email to user : ${error.message}`);
     }
 
 
@@ -449,13 +450,13 @@ async function passwordResetMethod(userName, otp, newPassword ) {
     const user = await collection.findOne({ username: userName});
 
     if (!user) {
-        throw new Error("User not found.");
+        throw new Error("Please enter a valid username.");
     }
 
     // Validate the old password
     
     if (user.otp !== otp) {
-        throw new Error("Incorrect otp.");
+        throw new Error("Please enter a valid OTP.");
     }
 
     // Encrypt the new password
