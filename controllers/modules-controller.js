@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/game-details', getGameDetailsHandler);
 router.get('/findPointsByStudent/:id', findgamePointsByStudentID);
-//router.get('/findStudentMarks', findAllStudentsMarks);
+router.get('/findStudentMarks', findAllStudentsMarks);
 router.post('/shareBadge', shareStudentadge);
 
 // Controller method to handle the GET request for game details
