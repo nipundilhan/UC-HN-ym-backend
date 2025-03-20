@@ -354,7 +354,7 @@ async function findAllStudentsGameMarks() {
                 game5badge1Shared: student.module1.game5?.badge1Shared || false,
                 game5badge2Shared: student.module1.game5?.badge2Shared || false,
                 game5badge3Shared: student.module1.game5?.badge3Shared || false,
-
+                moods: student.moods.length,
             };
         })
     );
