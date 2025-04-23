@@ -481,6 +481,7 @@ function generateCompleteMoods(moods, signupDate) {
         mood: mood.mood
     }));
 
+    /*
     // Get date range based on signup date
     const dateRange = getDateRange(signupDate);
 
@@ -492,6 +493,8 @@ function generateCompleteMoods(moods, signupDate) {
 
     // Order the moods with the latest first
     return completeMoods.sort((a, b) => new Date(b.date) - new Date(a.date));
+    */
+    return recordedMoods.sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
 async function shareBadge(data) {
