@@ -9,7 +9,7 @@ async function connectDB() {
     try {
         await client.connect();
         console.log('Connected to MongoDB Atlas!');
-        return client.db('yngMnd-ng');
+        return client.db('yngMnd-mexNg');
     } catch (err) {
         console.error('Failed to connect to the database. Error:', err);
         process.exit(1);
